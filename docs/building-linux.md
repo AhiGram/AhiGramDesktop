@@ -1,50 +1,58 @@
-## Build instructions for Linux using Docker
+## Build instructions for Linux using Docker (AhiGram Desktop)
+
+This document describes how to build **AhiGram Desktop** (a fork of Telegram Desktop) using Docker. This method ensures a consistent build environment and avoids dependency conflicts on your host system.
 
 ### Prepare folder
 
-Choose a folder for the future build, for example **/home/user/TBuild**. It will be named ***BuildPath*** in the rest of this document. All commands will be launched from Terminal.
+Choose a folder for the future build, for example **/home/user/AhiBuild**. It will be named ***BuildPath*** in the rest of this document. All commands should be launched from your terminal.
 
 ### Obtain your API credentials
 
-You will require **api_id** and **api_hash** to access the Telegram API servers. To learn how to obtain them [click here][api_credentials].
+To interact with Telegram servers, you will require an **api_id** and **api_hash**.
+- Instructions on how to obtain them: [click here][api_credentials].
+- **Note:** For AhiGram, it is highly recommended to use your own production keys to avoid rate limits.
 
 ### Clone source code and prepare libraries
 
-Install [poetry](https://python-poetry.org), go to ***BuildPath*** and run
+Install [poetry](https://python-poetry.org), navigate to your ***BuildPath*** and run:
 
-    git clone --recursive https://github.com/telegramdesktop/tdesktop.git
-    ./tdesktop/Telegram/build/prepare/linux.sh
+    git clone --recursive https://github.com/AhiGram/AhiGramDesktop.git
+    cd AhiGramDesktop
+    ./Telegram/build/prepare/linux.sh
 
 ### Building the project
 
-Go to ***BuildPath*/tdesktop** and run (using [your **api_id** and **api_hash**](#obtain-your-api-credentials))
+Run the Docker container to build the project. Replace `YOUR_API_ID` and `YOUR_API_HASH` with your actual credentials.
 
     docker run --rm -it \
         -u $(id -u) \
-        -v "$PWD:/usr/src/tdesktop" \
+        -v "$PWD:/usr/src/ahigram" \
         tdesktop:centos_env \
-        /usr/src/tdesktop/Telegram/build/docker/centos_env/build.sh \
+        /usr/src/ahigram/Telegram/build/docker/centos_env/build.sh \
         -D TDESKTOP_API_ID=YOUR_API_ID \
         -D TDESKTOP_API_HASH=YOUR_API_HASH
 
-Or, to create a debug build, run (also using [your **api_id** and **api_hash**](#obtain-your-api-credentials))
+#### Creating a Debug Build
+If you need to debug your changes (e.g., testing the **ByeDPI** integration), use the following command:
 
     docker run --rm -it \
         -u $(id -u) \
-        -v "$PWD:/usr/src/tdesktop" \
+        -v "$PWD:/usr/src/ahigram" \
         -e CONFIG=Debug \
         tdesktop:centos_env \
-        /usr/src/tdesktop/Telegram/build/docker/centos_env/build.sh \
+        /usr/src/ahigram/Telegram/build/docker/centos_env/build.sh \
         -D TDESKTOP_API_ID=YOUR_API_ID \
         -D TDESKTOP_API_HASH=YOUR_API_HASH
 
-The built files will be in the `out` directory.
+The compiled binaries will be located in the `out` directory.
 
 ### Visual Studio Code integration
 
-Ensure you've followed the instruction up to the [**Clone source code and prepare libraries**](#clone-source-code-and-prepare-libraries) step at least.
+If you prefer developing in VS Code, you can use **Dev Containers**:
 
-Open the repository in Visual Studio Code, install the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension and add the following to `.vscode/settings.json` (using [your **api_id** and **api_hash**](#obtain-your-api-credentials)):
+1. Open the **AhiGramDesktop** folder in VS Code.
+2. Install the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension.
+3. Add your API credentials to `.vscode/settings.json`:
 
     {
         "cmake.configureSettings": {
@@ -53,8 +61,6 @@ Open the repository in Visual Studio Code, install the [Dev Containers](https://
         }
     }
 
-After that, choose **Reopen in Container** via the menu triggered by the green button in bottom left corner and you're done.
-
-![Quick actions Status bar item](https://code.visualstudio.com/assets/docs/devcontainers/containers/remote-dev-status-bar.png)
+4. Click the green button in the bottom left corner and select **"Reopen in Container"**.
 
 [api_credentials]: api_credentials.md

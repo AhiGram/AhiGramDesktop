@@ -1,4 +1,4 @@
-# Build instructions for Windows 64-bit
+# Build instructions for Windows 64-bit (AhiGram Desktop)
 
 - [Prepare folder](#prepare-folder)
 - [Install third party software](#install-third-party-software)
@@ -8,45 +8,51 @@
 
 ## Prepare folder
 
-The build is done in **Visual Studio 2022** with **10.0.26100.0** SDK version.
+The build is performed using **Visual Studio 2022** with the **10.0.26100.0** SDK version.
 
-Choose an empty folder for the future build, for example **D:\\TBuild**. It will be named ***BuildPath*** in the rest of this document. Create two folders there, ***BuildPath*\\ThirdParty** and ***BuildPath*\\Libraries**.
+Choose an empty folder for the build, for example **D:\AhiBuild**. It will be referred to as ***BuildPath***. Create two subfolders: ***BuildPath*\ThirdParty** and ***BuildPath*\Libraries**.
 
-All commands (if not stated otherwise) will be launched from **x64 Native Tools Command Prompt for VS 2022.bat** (should be in **Start Menu > Visual Studio 2022** menu folder). Pay attention not to use any other Command Prompt.
+All commands must be executed from the **x64 Native Tools Command Prompt for VS 2022.bat** (found in **Start Menu > Visual Studio 2022**). Do not use a standard Command Prompt or PowerShell.
 
 ### Obtain your API credentials
 
-You will require **api_id** and **api_hash** to access the Telegram API servers. To learn how to obtain them [click here][api_credentials].
+You will require an **api_id** and **api_hash** to access the Telegram API.
+- Instructions on how to obtain them: [click here][api_credentials].
 
 ## Install third party software
 
-* Download **Python 3.10** installer from [https://www.python.org/downloads/](https://www.python.org/downloads/) and install it with adding to PATH.
-* Download **Git** installer from [https://git-scm.com/download/win](https://git-scm.com/download/win) and install it.
+* **Python 3.10**: Download from [python.org](https://www.python.org/downloads/) and ensure "Add to PATH" is checked during installation.
+* **Git**: Download and install from [git-scm.com](https://git-scm.com/download/win).
 
 ## Clone source code and prepare libraries
 
-Open **x64 Native Tools Command Prompt for VS 2022.bat**, go to ***BuildPath*** and run
+Open the **x64 Native Tools Command Prompt**, navigate to your ***BuildPath*** and run:
 
-    git clone --recursive https://github.com/telegramdesktop/tdesktop.git
-    tdesktop\Telegram\build\prepare\win.bat
+    git clone --recursive https://github.com/AhiGram/AhiGramDesktop.git
+    cd AhiGramDesktop
+    Telegram\build\prepare\win.bat
 
 ## Build the project
 
-Go to ***BuildPath*\\tdesktop\\Telegram** and run (using [your **api_id** and **api_hash**](#obtain-your-api-credentials))
+Navigate to ***BuildPath*\AhiGramDesktop\Telegram** and run the configuration script with your credentials:
 
     configure.bat x64 -D TDESKTOP_API_ID=YOUR_API_ID -D TDESKTOP_API_HASH=YOUR_API_HASH
 
-* Open ***BuildPath*\\tdesktop\\out\\Telegram.sln** in Visual Studio 2022
-* Select Telegram project and press Build > Build Telegram (Debug and Release configurations)
-* The result Telegram.exe will be located in **D:\TBuild\tdesktop\out\Debug** (and **Release**)
+1. Open ***BuildPath*\AhiGramDesktop\out\Telegram.sln** in Visual Studio 2022.
+2. Select the **Telegram** project in the Solution Explorer.
+3. Go to **Build > Build Telegram** (available for both Debug and Release configurations).
+4. The resulting `AhiGram.exe` (or `Telegram.exe`) will be located in ***BuildPath*\AhiGramDesktop\out\Debug** (or **Release**).
 
 ### Qt Visual Studio Tools
 
-For better debugging you may want to install Qt Visual Studio Tools:
+For an improved debugging experience, it is recommended to install the Qt extensions:
+* **Extensions** -> **Manage Extensions**
+* Search for **Qt** in the **Online** tab.
+* Install **Qt Visual Studio Tools**.
 
-* Open **Extensions** -> **Manage Extensions**
-* Go to **Online** tab
-* Search for **Qt**
-* Install **Qt Visual Studio Tools** extension
+---
+
+### License
+AhiGram Desktop is a fork of Telegram Desktop and is licensed under the **GNU GPL v3**.
 
 [api_credentials]: api_credentials.md
