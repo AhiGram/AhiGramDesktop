@@ -1,16 +1,16 @@
-## Build instructions for macOS
+## Build instructions for macOS (AhiGram Desktop)
 
 ### Prepare folder
 
-Choose a folder for the future build, for example **/Users/user/AhiBuild**. It will be named ***BuildPath*** in the rest of this document. All commands will be launched from Terminal.
+Choose a folder for the build, for example **/Users/user/AhiBuild**. It will be named ***BuildPath***.
 
-**Note about disk space:** The full build process will require approximately **55 GB** of free space. This includes:
-- **~35 GB** for libraries (when building for both x64 and arm64 architectures)
-- **~20 GB** for the compiled app (in the `out` folder)
+**Note about disk space:**
+- **~35 GB** for libraries.
+- **~20 GB** for the `out` folder.
 
 ### Obtain your API credentials
 
-You will require **api_id** and **api_hash** to access the Telegram API servers. To learn how to obtain them [click here][api_credentials].
+You will require **api_id** and **api_hash**. [Click here][api_credentials] for details.
 
 ### Clone source code and prepare libraries
 
@@ -27,10 +27,10 @@ Go to ***BuildPath*** and run:
 
 ### Building the project
 
-Go to ***BuildPath*/AhiGramDesktop/Telegram** and run (using [your **api_id** and **api_hash**](#obtain-your-api-credentials)):
+Go to ***BuildPath*/AhiGramDesktop/Telegram** and run:
 
     ./configure.sh -D TDESKTOP_API_ID=YOUR_API_ID -D TDESKTOP_API_HASH=YOUR_API_HASH
 
-Then launch Xcode, open ***BuildPath*/AhiGramDesktop/out/Telegram.xcodeproj** and build for Debug / Release.
+Launch Xcode, open ***BuildPath*/AhiGramDesktop/out/Telegram.xcodeproj** and build for Debug or Release.
 
 [api_credentials]: api_credentials.md
