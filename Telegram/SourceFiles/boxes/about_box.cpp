@@ -34,36 +34,33 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 namespace {
 
 rpl::producer<TextWithEntities> Text1() {
-	return tr::lng_about_text1(
-		lt_api_link,
-		tr::lng_about_text1_api(tr::url(u"https://core.telegram.org/api"_q)),
-		tr::marked);
+	auto result = TextWithEntities{ u"An unofficial fork "_q };
+	result.append(tr::link("AhiGram", "https://t.me/AhiGram"));
+	result.append(u" that expands the functionality and possibilities of Telegram Desktop."_q);
+	return rpl::single(result);
 }
 
 rpl::producer<TextWithEntities> Text2() {
-	return tr::lng_about_text2(
-		lt_gpl_link,
-		rpl::single(tr::link(
-			"GNU GPL",
-			"https://github.com/telegramdesktop/tdesktop/blob/master/LICENSE")),
-		lt_github_link,
-		rpl::single(tr::link(
-			"GitHub",
-			"https://github.com/telegramdesktop/tdesktop")),
-		tr::marked);
+	auto result = TextWithEntities{ u"The program is licensed under "_q };
+	result.append(tr::link("GNU GPL", "https://github.com/AhiGram/AhiGramDesktop/blob/master/LICENSE"));
+	result.append(u" version 3. It is a fork of "_q);
+	result.append(tr::link("tdesktop", "https://github.com/telegramdesktop/tdesktop"));
+	result.append(u". The source code is available on "_q);
+	result.append(tr::link("GitHub", "https://github.com/AhiGram/AhiGramDesktop"));
+	result.append(u"."_q);
+	return rpl::single(result);
 }
 
 rpl::producer<TextWithEntities> Text3() {
-	return tr::lng_about_text3(
-		lt_faq_link,
-		tr::lng_about_text3_faq(tr::url(telegramFaqLink())),
-		tr::marked);
+	auto result = TextWithEntities{ u"Frequently Asked Questions: Questions about "_q };
+	result.append(tr::link("AhiGram", "https://t.me/AhiGramFAQ"));
+	return rpl::single(result);
 }
 
 } // namespace
 
 void AboutBox(not_null<Ui::GenericBox*> box) {
-	box->setTitle(u"Telegram Desktop"_q);
+	box->setTitle(rpl::single(u"AhiGram Desktop"_q));
 
 	auto layout = box->verticalLayout();
 
@@ -132,7 +129,7 @@ void AboutBox(not_null<Ui::GenericBox*> box) {
 }
 
 QString telegramFaqLink() {
-	const auto result = u"https://telegram.org/faq"_q;
+	const auto result = u"https://t.me/AhiGramFAQ"_q;
 	const auto langpacked = [&](const char *language) {
 		return result + '/' + language;
 	};
