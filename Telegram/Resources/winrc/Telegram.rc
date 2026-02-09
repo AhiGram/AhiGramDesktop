@@ -60,11 +60,11 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "Telegram FZ-LLC"
-            VALUE "FileDescription", "Telegram Desktop"
+            VALUE "CompanyName", "AhiGram Project"
+            VALUE "FileDescription", "AhiGram Desktop"
             VALUE "FileVersion", "6.5.1.0"
             VALUE "LegalCopyright", "Copyright (C) 2014-2026"
-            VALUE "ProductName", "Telegram Desktop"
+            VALUE "ProductName", "AhiGram Desktop"
             VALUE "ProductVersion", "6.5.1.0"
         END
     END
