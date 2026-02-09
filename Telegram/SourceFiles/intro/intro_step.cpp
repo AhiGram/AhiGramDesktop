@@ -471,10 +471,8 @@ void Step::paintCover(QPainter &p, int top) {
 	auto planeLeft = (width() - st::introCoverIcon.width()) / 2 - st::introCoverIconLeft;
 	auto planeTop = top + st::introCoverIconTop;
 	if (top < 0 && !_hasCover) {
-		auto deltaLeft = -qRound(float64(st::introPlaneWidth / st::introPlaneHeight) * top);
-//		auto deltaTop = top;
-		planeLeft += deltaLeft;
-	//	planeTop += top;
+		auto deltaTop = top;
+		planeTop += deltaTop;
 	}
 	st::introCoverIcon.paint(p, planeLeft, planeTop, width());
 }
