@@ -58,6 +58,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/layers/generic_box.h"
 #include "styles/style_layers.h"
 
+// AhiGram Include
+#include "ahigram/core/ahi_main.h"
+
 #ifndef TDESKTOP_DISABLE_SPELLCHECK
 #include "chat_helpers/spellchecker_common.h"
 #endif // TDESKTOP_DISABLE_SPELLCHECK
@@ -125,6 +128,7 @@ Session::Session(
 , _locationPickers(std::make_unique<Data::LocationPickers>())
 , _credits(std::make_unique<Data::Credits>(this))
 , _promoSuggestions(std::make_unique<Data::PromoSuggestions>(this, [=] {
+	AhiGram::Initialize(this); // AhiGram Initialize LOG
 	using State = Data::SetupEmailState;
 	if (_promoSuggestions->setupEmailState() == State::Setup
 		|| _promoSuggestions->setupEmailState() == State::SetupNoSkip) {
