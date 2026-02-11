@@ -95,8 +95,10 @@ PRIVATE
 )
 
 set(ahigram_source_files
-    ahigram/core/ahi_main.h
     ahigram/core/ahi_main.cpp
+    ahigram/core/ahi_main.h
+    ahigram/networking/ahi_socket_wrap.cpp
+    ahigram/networking/ahi_socket_wrap.h
 )
 
 target_precompile_headers(Telegram PRIVATE $<$<COMPILE_LANGUAGE:CXX,OBJCXX>:${src_loc}/stdafx.h>)
