@@ -11,7 +11,13 @@ add_library(tdesktop::td_ui ALIAS td_ui)
 include(lib_ui/cmake/generate_styles.cmake)
 include(cmake/generate_numbers.cmake)
 
+set(ahigram_style_files
+    ahigram/ui/ahi_base.style
+)
+
 set(style_files
+    ${ahigram_style_files}
+
     ui/td_common.style
     ui/filter_icons.style
     ui/menu_icons.style
