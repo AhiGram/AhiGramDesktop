@@ -11,8 +11,10 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include "main/main_session.h"
 
 namespace AhiGram {
-    void Initialize(not_null<Main::Session*> session) {
-        LOG(("AhiGram: Initializing for session %1...")
-        .arg(QString::number(session->userId().bare)));
-    }
+
+void Initialize(not_null<Main::Session *> session) {
+  LOG(("AhiGram: Initializing for session %1...")
+          .arg(QString::number(session->userId().bare)));
 }
+
+} // namespace AhiGram
