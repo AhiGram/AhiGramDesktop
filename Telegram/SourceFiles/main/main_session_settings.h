@@ -36,6 +36,15 @@ public:
 	void setSupportSwitch(Support::SwitchSettings value) {
 		_supportSwitch = value;
 	}
+
+	// AhiGram
+	[[nodiscard]] bool ahiWelcomeDismissed() const {
+		return _ahiWelcomeDismissed;
+	}
+	void setAhiWelcomeDismissed(bool dismissed) {
+		_ahiWelcomeDismissed = dismissed;
+	}
+
 	[[nodiscard]] Support::SwitchSettings supportSwitch() const {
 		return _supportSwitch;
 	}
@@ -228,6 +237,8 @@ private:
 	rpl::variable<int> _supportChatsTimeSlice
 		= kDefaultSupportChatsLimitSlice;
 	rpl::variable<bool> _supportAllSearchResults = false;
+
+	bool _ahiWelcomeDismissed = false; // AhiGram
 
 	base::flat_set<uint64> _ratedTranscriptions;
 
