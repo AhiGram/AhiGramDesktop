@@ -29,9 +29,7 @@ void AhiTopBarSuggestion::setupContent() {
 	setRightIcon(RightIcon::Close);
 
 	auto title = Ui::Text::Bold(u"✨ AhiGram Desktop"_q);
-	auto description = TextWithEntities{
-		u"Welcome to your fork! Click here to join our channel."_q
-	};
+	auto description = TextWithEntities{ u"Welcome to your fork! Click here to join our channel."_q };
 
 	setContent(std::move(title), std::move(description));
 
