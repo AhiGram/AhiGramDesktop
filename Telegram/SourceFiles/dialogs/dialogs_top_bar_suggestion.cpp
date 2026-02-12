@@ -51,7 +51,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_chat.h"
 #include "styles/style_chat_helpers.h"
 #include "styles/style_dialogs.h"
-#include "styles/style_layers.h"
+
+// AhiGram Include
+#include "ahigram/ui/ahi_suggestions.h"
 
 namespace Dialogs {
 namespace {
@@ -258,6 +260,22 @@ rpl::producer<Ui::SlideWrap<Ui::RpWidget>*> TopBarSuggestionValue(
 					state->unconfirmedWarning = nullptr;
 					state->wrap = nullptr;
 				}
+			}
+
+			// AhiGram
+			if (AhiGram::ShowWelcomeIfNeeded(
+					session,
+					parent,
+					&state->content,
+					[=] { repeat(repeat); })) {
+				const auto content = state->content;
+				ensureWrap(content);
+				content->setRightIcon(
+					Dialogs::TopBarSuggestionContent::RightIcon::Close);
+				content->resizeToWidth(parent->width());
+				state->desiredWrapToggle.force_assign(
+					Toggle{ true, anim::type::normal });
+				return;
 			}
 
 			ensureContent();
