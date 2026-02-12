@@ -80,6 +80,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtGui/QGuiApplication>
 #include <QtGui/QClipboard>
 
+// AhiGram Include
+#include "ahigram/ui/settings/ahi_settings_menu.h"
+
 namespace Window {
 namespace {
 
@@ -742,6 +745,13 @@ void MainMenu::setupMenu() {
 		{ &st::menuIconSettings }
 	)->setClickedCallback([=] {
 		controller->showSettings();
+	});
+
+	addAction(
+		rpl::single(QString(u"AhiGram Settings"_q)),
+		{ &st::menuIconSettings }
+	)->setClickedCallback([=] {
+		controller->showSettings(Settings::AhiMainSettings::Id());
 	});
 
 	_nightThemeToggle = addAction(

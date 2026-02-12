@@ -102,10 +102,14 @@ telegram_add_apple_swift_runtime(Telegram)
 set(ahigram_source_files
     ahigram/core/ahi_main.cpp
     ahigram/core/ahi_main.h
+    ahigram/core/ahi_storage.cpp
+    ahigram/core/ahi_storage.h
     ahigram/networking/ahi_socket_wrap.cpp
     ahigram/networking/ahi_socket_wrap.h
     ahigram/ui/ahi_suggestions.cpp
     ahigram/ui/ahi_suggestions.h
+    ahigram/ui/settings/ahi_settings_menu.cpp
+    ahigram/ui/settings/ahi_settings_menu.h
 )
 
 target_precompile_headers(Telegram PRIVATE $<$<COMPILE_LANGUAGE:CXX,OBJCXX>:${src_loc}/stdafx.h>)
