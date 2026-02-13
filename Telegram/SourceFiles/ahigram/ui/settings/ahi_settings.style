@@ -18,3 +18,5 @@ ahiSettingsButton: SettingsButton(infoProfileButton) {
 ahiSettingsButtonNoIcon: SettingsButton(ahiSettingsButton) {
 	padding: margins(22px, 10px, 22px, 8px);
 }
+
+ahiMenuIconSettings: icon {{ "ahigram/menu_settings", menuIconColor }};
