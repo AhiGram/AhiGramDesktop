@@ -83,6 +83,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 // AhiGram Includes
 #include "ahigram/ui/settings/ahi_settings_menu.h"
 #include "ahigram/ahi_lang.h"
+#include "styles/style_ahi_settings.h"
 
 namespace Window {
 namespace {
@@ -750,7 +751,7 @@ void MainMenu::setupMenu() {
 
 	addAction(
 		AhiGram::trReactive(u"ahigram_settings_title"_q),
-		{ &st::menuIconSettings }
+		{ &st::ahiMenuIconSettings }
 	)->setClickedCallback([=] {
 		controller->showSettings(Settings::AhiMainSettings::Id());
 	});

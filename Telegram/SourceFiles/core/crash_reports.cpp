@@ -398,103 +398,14 @@ void FinishCatching() {
 }
 
 StartResult Start() {
-#ifndef TDESKTOP_DISABLE_CRASH_REPORTS
-	ReportPath = cWorkingDir() + u"tdata/working"_q;
-
-#ifdef Q_OS_WIN
-	FILE *f = nullptr;
-	if (_wfopen_s(&f, ReportPath.toStdWString().c_str(), L"rb") != 0) {
-		f = nullptr;
-	} else {
-#else // !Q_OS_WIN
-	if (FILE *f = fopen(QFile::encodeName(ReportPath).constData(), "rb")) {
-#endif // else for !Q_OS_WIN
-		QByteArray lastdump;
-		char buffer[256 * 1024] = { 0 };
-		int32 read = fread(buffer, 1, 256 * 1024, f);
-		if (read > 0) {
-			lastdump.append(buffer, read);
-		}
-		fclose(f);
-
-		LOG(("Opened '%1' for reading, the previous "
-			"Telegram Desktop launch was not finished properly :( "
-			"Crash log size: %2").arg(ReportPath).arg(lastdump.size()));
-
-		return lastdump;
-	}
-
-#endif // !TDESKTOP_DISABLE_CRASH_REPORTS
-	return Restart();
+    return Restart();
 }
 
 Status Restart() {
-#ifndef TDESKTOP_DISABLE_CRASH_REPORTS
-	if (ReportFile) {
-		return Started;
-	}
-
-#ifdef Q_OS_WIN
-	if (_wfopen_s(&ReportFile, ReportPath.toStdWString().c_str(), L"wb") != 0) {
-		ReportFile = nullptr;
-	}
-#else // Q_OS_WIN
-	ReportFile = fopen(QFile::encodeName(ReportPath).constData(), "wb");
-#endif // else for Q_OS_WIN
-	if (ReportFile) {
-#ifdef Q_OS_WIN
-		ReportFileNo = _fileno(ReportFile);
-#else // Q_OS_WIN
-		ReportFileNo = fileno(ReportFile);
-#endif // else for Q_OS_WIN
-		if (SetSignalHandlers) {
-#ifndef Q_OS_WIN
-			struct sigaction sigact;
-
-			sigact.sa_sigaction = SignalHandler;
-			sigemptyset(&sigact.sa_mask);
-			sigact.sa_flags = SA_NODEFER | SA_RESETHAND | SA_SIGINFO;
-
-			for (const auto signum : HandledSignals) {
-				sigaction(signum, &sigact, &OldSigActions[signum]);
-			}
-#else // !Q_OS_WIN
-			for (const auto signum : HandledSignals) {
-				signal(signum, SignalHandler);
-			}
-#endif // else for !Q_OS_WIN
-		}
-
-		InstallOperatorNewHandler();
-		InstallQtMessageHandler();
-
-		return Started;
-	}
-
-	LOG(("FATAL: Could not open '%1' for writing!").arg(ReportPath));
-
-	return CantOpen;
-#else // !TDESKTOP_DISABLE_CRASH_REPORTS
-	return Started;
-#endif // else for !TDESKTOP_DISABLE_CRASH_REPORTS
+    return Started;
 }
 
-void Finish() {
-#ifndef TDESKTOP_DISABLE_CRASH_REPORTS
-	FinishCatching();
-
-	if (ReportFile) {
-		fclose(ReportFile);
-		ReportFile = nullptr;
-
-#ifdef Q_OS_WIN
-		_wunlink(ReportPath.toStdWString().c_str());
-#else // Q_OS_WIN
-		unlink(ReportPath.toUtf8().constData());
-#endif // else for Q_OS_WIN
-	}
-#endif // !TDESKTOP_DISABLE_CRASH_REPORTS
-}
+void Finish() { }
 
 void SetAnnotation(const std::string &key, const QString &value) {
 	static QMutex mutex;
