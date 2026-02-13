@@ -80,8 +80,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtGui/QGuiApplication>
 #include <QtGui/QClipboard>
 
-// AhiGram Include
+// AhiGram Includes
 #include "ahigram/ui/settings/ahi_settings_menu.h"
+#include "ahigram/ahi_lang.h"
 
 namespace Window {
 namespace {
@@ -748,7 +749,7 @@ void MainMenu::setupMenu() {
 	});
 
 	addAction(
-		rpl::single(QString(u"AhiGram Settings"_q)),
+		AhiGram::trReactive(u"ahigram_settings_title"_q),
 		{ &st::menuIconSettings }
 	)->setClickedCallback([=] {
 		controller->showSettings(Settings::AhiMainSettings::Id());

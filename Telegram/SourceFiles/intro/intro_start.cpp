@@ -15,6 +15,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "main/main_account.h"
 #include "main/main_app_config.h"
 
+// AhiGram Include
+#include "ahigram/ahi_lang.h"
+
 namespace Intro {
 namespace details {
 
@@ -26,10 +29,11 @@ StartWidget::StartWidget(
 	setMouseTracking(true);
 	setTitleText(rpl::single(u"AhiGram Desktop"_q));
 	// setDescriptionText(tr::lng_intro_about());
-	setDescriptionText(rpl::single(
-		u"Welcome to AhiGram Desktop, a fork of the official Telegram product.\n"
-		"Security, custom features, and a redesigned interface."_q
-	));
+	//setDescriptionText(rpl::single(
+	//	u"Welcome to AhiGram Desktop, a fork of the official Telegram product.\n"
+	//	"Security, custom features, and a redesigned interface."_q
+	//));
+	setDescriptionText(AhiGram::trReactive(u"ahigram_intro_title"_q));
 	show();
 }
 

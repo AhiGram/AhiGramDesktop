@@ -13,6 +13,7 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include "ui/basic_click_handlers.h"
 #include "ui/text/text_utilities.h"
 #include "ui/rp_widget.h"
+
 #include "styles/style_dialogs.h"
 
 namespace AhiGram {
@@ -28,7 +29,7 @@ AhiTopBarSuggestion::AhiTopBarSuggestion(
 void AhiTopBarSuggestion::setupContent() {
 	setRightIcon(RightIcon::Close);
 
-	auto title = Ui::Text::Bold(u"✨ AhiGram Desktop"_q);
+	auto title = Ui::Text::Bold(u"✨ AhiGram"_q);
 	auto description = TextWithEntities{ u"Welcome to your fork! Click here to join our channel."_q };
 
 	setContent(std::move(title), std::move(description));
