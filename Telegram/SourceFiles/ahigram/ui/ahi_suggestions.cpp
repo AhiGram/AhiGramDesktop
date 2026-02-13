@@ -14,7 +14,7 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include "ui/text/text_utilities.h"
 #include "ui/rp_widget.h"
 
-#include "styles/style_dialogs.h"
+#include "styles/style_ahi_base.h"
 
 namespace AhiGram {
 
@@ -66,7 +66,7 @@ bool ShowWelcomeIfNeeded(
 		}, content->lifetime());
 	}
 
-	content->setLeftPadding(rpl::single(st::dialogsTopBarLeftPadding));
+	content->setLeftPadding(rpl::single(st::ahiDialogsTopBarLeftPadding));
 	
 	content->resizeToWidth(parent->width());
 	content->show();
