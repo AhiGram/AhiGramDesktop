@@ -1,0 +1,20 @@
+/*
+This file is part of AhiGram,
+a fork of Telegram Desktop for the Telegram messaging service.
+
+For license and copyright information please follow this link:
+https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
+*/
+
+using "ui/widgets/widgets.style";
+using "info/info.style";
+
+ahiSettingsButton: SettingsButton(infoProfileButton) {
+	style: boxTextStyle;
+	padding: margins(60px, 10px, 22px, 10px);
+	iconLeft: 20px;
+}
+
+ahiSettingsButtonNoIcon: SettingsButton(ahiSettingsButton) {
+	padding: margins(22px, 10px, 22px, 8px);
+}

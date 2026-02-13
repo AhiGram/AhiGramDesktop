@@ -17,12 +17,11 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include "settings/settings_common_session.h"
 #include "settings/settings_common.h"
 #include "ui/qt_object_factory.h"
-#include "ui/widgets/buttons.h"
 #include "ui/wrap/vertical_layout.h"
 #include "ui/vertical_list.h"
 #include "window/window_session_controller.h"
 
-#include "styles/style_settings.h"
+#include "styles/style_ahi_settings.h"
 
 namespace Settings {
 
@@ -51,7 +50,7 @@ void AhiMainSettings::setupContent() {
         object_ptr<Ui::SettingsButton>(
             content,
             AhiGram::trReactive(u"ahigram_bypass_slowdown_title"_q),
-            st::settingsButtonNoIcon
+            st::ahiSettingsButtonNoIcon
         )
     );
 

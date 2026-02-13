@@ -13,6 +13,7 @@ include(cmake/generate_numbers.cmake)
 
 set(ahigram_style_files
     ahigram/ui/ahi_base.style
+    ahigram/ui/settings/ahi_settings.style
 )
 
 set(style_files
