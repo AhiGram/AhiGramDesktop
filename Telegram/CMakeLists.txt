@@ -95,6 +95,8 @@ PRIVATE
 )
 
 set(ahigram_source_files
+    ahigram/ahi_lang.cpp
+    ahigram/ahi_lang.h
     ahigram/core/ahi_main.cpp
     ahigram/core/ahi_main.h
     ahigram/core/ahi_storage.cpp

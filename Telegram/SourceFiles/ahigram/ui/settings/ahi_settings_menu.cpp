@@ -8,6 +8,7 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 
 #include "ahi_settings_menu.h"
 #include "ahigram/core/ahi_storage.h"
+#include "ahigram/ahi_lang.h"
 
 #include "dialogs/ui/dialogs_top_bar_suggestion_content.h"
 #include "rpl/producer.h"
@@ -34,7 +35,7 @@ AhiMainSettings::AhiMainSettings(
 }
 
 rpl::producer<QString> AhiMainSettings::title() {
-    return rpl::single(QString(u"AhiGram Settings"_q));
+    return AhiGram::trReactive(u"ahigram_settings_title"_q);
 }
 
 void AhiMainSettings::setupContent() {
@@ -43,13 +44,13 @@ void AhiMainSettings::setupContent() {
     
     auto initialValue = settings.data().ahiBypass.current();
 
-    Ui::AddSubsectionTitle(content, rpl::single(u"AhiBypass"_q));
+    Ui::AddSubsectionTitle(content, AhiGram::trReactive(u"ahigram_bypass_title"_q));
     Ui::AddSkip(content);
 
     const auto bypassButton = content->add(
         object_ptr<Ui::SettingsButton>(
             content,
-            rpl::single(u"Bypass slowdown"_q),
+            AhiGram::trReactive(u"ahigram_bypass_slowdown_title"_q),
             st::settingsButtonNoIcon
         )
     );
@@ -59,8 +60,6 @@ void AhiMainSettings::setupContent() {
     bypassButton->toggledChanges(
     ) | rpl::on_next([=, &settings](bool toggled) {
         settings.data().ahiBypass.force_assign(toggled);
-
-        LOG(("AhiGram: Bypass toggled to %1").arg(toggled));
     }, content->lifetime());
 
     Ui::ResizeFitChild(this, content);

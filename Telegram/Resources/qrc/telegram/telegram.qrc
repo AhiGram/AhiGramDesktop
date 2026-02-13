@@ -63,4 +63,8 @@
     <file alias="default_shortcuts-custom.json">../../default_shortcuts-custom.json</file>
     <file alias="org.ahigram.desktop.desktop">../../../../lib/xdg/com.ahigram.desktop.desktop</file>
   </qresource>
+  <qresource prefix="/ahigram">
+    <file alias="en.strings">../../../SourceFiles/ahigram/langs/ahigram.en.strings</file>
+    <file alias="ru.strings">../../../SourceFiles/ahigram/langs/ahigram.ru.strings</file>
+  </qresource>
 </RCC>
