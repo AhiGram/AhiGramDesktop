@@ -100,6 +100,8 @@ PRIVATE
 telegram_add_apple_swift_runtime(Telegram)
 
 set(ahigram_source_files
+    ahigram/ahi_lang.cpp
+    ahigram/ahi_lang.h
     ahigram/core/ahi_main.cpp
     ahigram/core/ahi_main.h
     ahigram/core/ahi_storage.cpp
