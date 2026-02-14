@@ -22,8 +22,9 @@ AhiSocket::AhiSocket(
     bool protocolForFiles)
 : AbstractSocket(thread)
 , _wrapped(std::move(wrapped))
-, _protocolForFiles(protocolForFiles) {
-    LOG(("AhiSocket: Wrapper created for %1 connection.").arg(_protocolForFiles ? u"file"_q : u"data"_q));
+, _protocolForFiles(protocolForFiles)
+, _firstWriteDone(false)
+, _totalBytesWritten(0) {
     
     AhiGram::Storage::Settings::Instance().data().ahiBypass.value(
     ) | rpl::on_next([this](bool enabled) {
@@ -35,52 +36,59 @@ AhiSocket::AhiSocket(
         _wrapped->disconnected() | rpl::start_to_stream(_disconnected, _lifetime);
         _wrapped->readyRead() | rpl::start_to_stream(_readyRead, _lifetime);
         _wrapped->error() | rpl::start_to_stream(_error, _lifetime);
-        _wrapped->syncTimeRequests() |rpl::start_to_stream(_syncTimeRequests, _lifetime);
-      }
+        _wrapped->syncTimeRequests() | rpl::start_to_stream(_syncTimeRequests, _lifetime);
+    } else {
+        LOG(("AhiSocket Error: Wrapped socket is null!"));
+    }
 }
 
 void AhiSocket::connectToHost(const QString &address, int port) {
-    _wrapped->connectToHost(address, port);
+    if (_wrapped) {
+#ifdef _DEBUG
+        LOG(("AhiSocket: Connecting to %1:%2").arg(address).arg(port));
+#endif
+        _wrapped->connectToHost(address, port);
+    }
 }
 
 bool AhiSocket::isGoodStartNonce(bytes::const_span nonce) {
-    return _wrapped->isGoodStartNonce(nonce);
+    return _wrapped ? _wrapped->isGoodStartNonce(nonce) : false;
 }
 
 void AhiSocket::timedOut() { 
-    _wrapped->timedOut(); 
+    if (_wrapped) _wrapped->timedOut(); 
 }
 
 bool AhiSocket::isConnected() { 
-    return _wrapped->isConnected(); 
+    return _wrapped ? _wrapped->isConnected() : false; 
 }
 
 bool AhiSocket::hasBytesAvailable() { 
-    return _wrapped->hasBytesAvailable(); 
+    return _wrapped ? _wrapped->hasBytesAvailable() : false; 
 }
 
 int64 AhiSocket::read(bytes::span buffer) { 
-    return _wrapped->read(buffer); 
+    return _wrapped ? _wrapped->read(buffer) : -1; 
 }
 
 void AhiSocket::write(bytes::const_span prefix, bytes::const_span buffer) {
-    if (!_wrapped) {
-        return;
-    }
+    if (!_wrapped) return;
 
     if (!_bypassEnabled) {
         _wrapped->write(prefix, buffer);
         return;
     }
 
-    static thread_local std::default_random_engine generator(std::random_device{}());
-
+    static thread_local std::mt19937 generator(std::random_device{}());
+    
     _totalBytesWritten += prefix.size() + buffer.size();
 
     if (!_firstWriteDone && !buffer.empty()) {
         _firstWriteDone = true;
-
         if (!prefix.empty()) {
+#ifdef _DEBUG
+            LOG(("AhiSocket: Initial handshake write (prefix: %1, buffer: %2)").arg(prefix.size()).arg(buffer.size()));
+#endif
             if (debugPostfix().contains(u"_ee"_q)) {
                 const auto split = std::min(buffer.size(), std::size_t(3));
                 _wrapped->write(prefix, buffer.subspan(0, split));
@@ -95,47 +103,53 @@ void AhiSocket::write(bytes::const_span prefix, bytes::const_span buffer) {
         }
     }
 
-    if (_protocolForFiles && _totalBytesWritten < 16 * 1024 && !buffer.empty()) {
-        const auto chunkSize = std::size_t(512);
+    if (!buffer.empty() && (_protocolForFiles || buffer.size() > 128)) {
+        std::uniform_int_distribution<std::size_t> dist(512, 1024);
+        
         auto offset = std::size_t(0);
+        int chunks = 0;
+
         while (offset < buffer.size()) {
             const auto remaining = buffer.size() - offset;
-            const auto current = std::min(remaining, chunkSize);
-            _wrapped->write(offset == 0 
-                ? prefix 
-                : bytes::const_span(),
-                buffer.subspan(offset, current));
+            const auto currentLimit = dist(generator);
+            
+            if (remaining < 100 && offset > 0) {
+                 _wrapped->write({}, buffer.subspan(offset));
+                 chunks++;
+                 break;
+            }
+
+            const auto current = std::min(remaining, currentLimit);
+            _wrapped->write(offset == 0 ? prefix : bytes::const_span(), buffer.subspan(offset, current));
             offset += current;
+            chunks++;
         }
-        return;
-    }
-
-    if (!buffer.empty() && buffer.size() >= 64 && buffer.size() < 1024) {
-        const auto maxSplit = std::min(buffer.size() - 1, std::size_t(128));
-        const auto minSplit = std::min(maxSplit, std::size_t(64));
-        std::uniform_int_distribution<std::size_t> dist(minSplit, maxSplit);
-        const auto split = dist(generator);
-
-        _wrapped->write(prefix, buffer.subspan(0, split));
-        _wrapped->write({}, buffer.subspan(split));
+        
+#ifdef _DEBUG
+        if (chunks > 1) {
+            LOG(("AhiSocket: Sharded %1 bytes into %2 chunks").arg(buffer.size()).arg(chunks));
+        }
+#else
+        if (chunks > 1 && buffer.size() > 1000000) { 
+            LOG(("AhiSocket: Large chunk sharded (%1 bytes)").arg(buffer.size()));
+        }
+#endif
     } else {
         _wrapped->write(prefix, buffer);
     }
 }
 
 int32 AhiSocket::debugState() { 
-    return _wrapped->debugState(); 
+    return _wrapped ? _wrapped->debugState() : 0; 
 }
 
 QString AhiSocket::debugPostfix() const {
-    return _wrapped->debugPostfix() + u"_ahi"_q;
+    return (_wrapped ? _wrapped->debugPostfix() : QString()) + u"_ahi"_q;
 }
 
 void AhiSocket::setDebugId(const QString &id) {
     _debugId = id;
-    if (_wrapped) {
-        _wrapped->setDebugId(id);
-    }
+    if (_wrapped) _wrapped->setDebugId(id);
 }
 
 std::unique_ptr<MTP::details::AbstractSocket>
@@ -143,11 +157,10 @@ Wrap(
     std::unique_ptr<MTP::details::AbstractSocket> &&socket,
     not_null<QThread *> thread, bool protocolForFiles) {
     if (!socket) {
+        LOG(("AhiSocket Error: Cannot wrap null socket!"));
         return nullptr;
     }
-    return std::make_unique<AhiSocket>(
-        thread, std::move(socket),
-        protocolForFiles);
+    return std::make_unique<AhiSocket>(thread, std::move(socket), protocolForFiles);
 }
 
 } // namespace AhiGram::Networking
