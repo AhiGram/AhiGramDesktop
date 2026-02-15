@@ -743,18 +743,19 @@ void MainMenu::setupMenu() {
 		});
 	}
 	addAction(
+		AhiGram::trReactive(u"ahigram_settings_title"_q),
+		{ &st::ahiMenuIconSettings }
+	)->setClickedCallback([=] {
+		controller->showSettings(Settings::AhiMainSettings::Id());
+	});
+	
+	addAction(
 		tr::lng_menu_settings(),
 		{ &st::menuIconSettings }
 	)->setClickedCallback([=] {
 		controller->showSettings();
 	});
 
-	addAction(
-		AhiGram::trReactive(u"ahigram_settings_title"_q),
-		{ &st::ahiMenuIconSettings }
-	)->setClickedCallback([=] {
-		controller->showSettings(Settings::AhiMainSettings::Id());
-	});
 
 	_nightThemeToggle = addAction(
 		tr::lng_menu_night_mode(),
