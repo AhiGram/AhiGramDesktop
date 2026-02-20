@@ -1,4 +1,4 @@
 "ahigram_settings_title" = "AhiGram Settings";
 "ahigram_bypass_title" = "Network"; 
-"ahigram_bypass_slowdown_title" = "Bypass slowdown (beta)";
+"ahigram_bypass_slowdown_title" = "Automatic proxy (beta)";
 "ahigram_intro_title" = "Welcome to AhiGram Desktop, a fork of the Telegram project.\nSecurity, customizable features, and a redesigned interface.";

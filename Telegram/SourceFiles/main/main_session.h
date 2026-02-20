@@ -76,6 +76,10 @@ namespace InlineBots {
 class AttachWebView;
 } // namespace InlineBots
 
+namespace AhiGram::Networking {
+class ProxyAutobot;
+} // namespace AhiGram::Networking
+
 namespace Ui {
 struct ColorIndicesCompressed;
 } // namespace Ui
@@ -216,6 +220,10 @@ public:
 	-> HistoryView::Reactions::CachedIconFactory & {
 		return *_cachedReactionIconFactory;
 	}
+	// AhiGram
+	[[nodiscard]] AhiGram::Networking::ProxyAutobot &proxyAutobot() const {
+        return *_proxyAutobot;
+    }
 
 	void saveSettings();
 	void saveSettingsDelayed(crl::time delay = kDefaultSaveDelay);
@@ -318,6 +326,7 @@ private:
 	const std::unique_ptr<Data::PromoSuggestions> _promoSuggestions;
 	const std::unique_ptr<Data::Passkeys> _passkeys;
 	const std::unique_ptr<Settings::FaqSuggestions> _faqSuggestions;
+	const std::unique_ptr<AhiGram::Networking::ProxyAutobot> _proxyAutobot; // AhiGram
 
 	using ReactionIconFactory = HistoryView::Reactions::CachedIconFactory;
 	const std::unique_ptr<ReactionIconFactory> _cachedReactionIconFactory;
