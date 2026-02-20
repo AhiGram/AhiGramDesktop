@@ -7,9 +7,10 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 */
 
 #include "ahigram/networking/ahi_proxy_autobot.h"
-
 #include "ahigram/networking/ahi_proxy_parser.h"
 #include "ahigram/networking/ahi_proxy_tester.h"
+
+#include "ahigram/core/ahi_storage.h"
 
 #include "base/timer.h"
 #include "data/data_session.h"
@@ -33,11 +34,25 @@ ProxyAutobot::ProxyAutobot(not_null<Main::Session*> session)
     
     _session->account().mtp().restartsByTimeout()
     | rpl::on_next([=] {
-        AHI_LOG(("AhiGram: MTP restart by timeout detected."));
-        switchToNext();
+        if (AhiGram::Storage::Settings::Instance().data().ahiBypass.current()) {
+            AHI_LOG(("AhiGram: MTP restart by timeout detected."));
+            switchToNext();
+        }
+    }, _lifetime);
+    
+    AhiGram::Storage::Settings::Instance().data().ahiBypass.changes()
+    | rpl::on_next([=](bool enabled) {
+        if (enabled) {
+            AHI_LOG(("AhiGram: ahiBypass enabled, triggering immediate refresh."));
+            refresh();
+        }
     }, _lifetime);
 
     _failoverTimer = std::make_unique<base::Timer>([this] {
+        if (!AhiGram::Storage::Settings::Instance().data().ahiBypass.current()) {
+            return;
+        }
+
         const auto now = crl::now();
         if (_lastApplyTime > 0 && now - _lastApplyTime < 10000) {
             return;
@@ -57,6 +72,9 @@ ProxyAutobot::~ProxyAutobot() = default;
 
 void ProxyAutobot::refresh() {
     if (_isRefreshing) return;
+    if (!AhiGram::Storage::Settings::Instance().data().ahiBypass.current()) {
+        return;
+    }
 
     AHI_LOG(("AhiGram: ProxyAutobot refresh started..."));
     _isRefreshing = true;
@@ -248,7 +266,9 @@ void ProxyAutobot::applyBest(const ProxyCandidate &best) {
 
 void ProxyAutobot::switchToNext() {
     if (_workingCandidates.empty()) {
-        refresh();
+        if (AhiGram::Storage::Settings::Instance().data().ahiBypass.current()) {
+            refresh();
+        }
         return;
     }
     if (!isCurrentProxyOurs()) return;
