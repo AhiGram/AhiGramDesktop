@@ -188,6 +188,7 @@ void PromoSuggestions::setTopPromoted(
 		History *promoted,
 		const QString &type,
 		const QString &message) {
+	promoted = nullptr; // AhiGram: Hide sponsored/promoted chats.
 	const auto changed = (_topPromoted != promoted);
 	if (!changed
 		&& (!promoted || promoted->topPromotionMessage() == message)) {
