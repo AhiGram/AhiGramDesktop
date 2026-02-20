@@ -61,6 +61,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 // AhiGram Includes
 #include "ahigram/core/ahi_main.h"
 #include "ahigram/networking/ahi_proxy_autobot.h"
+#include "ahigram/core/ahi_storage.h"
 
 #ifndef TDESKTOP_DISABLE_SPELLCHECK
 #include "chat_helpers/spellchecker_common.h"
@@ -264,7 +265,9 @@ Session::Session(
 
 	// AhiGram
 	crl::on_main(this, [=] {
-		_proxyAutobot->refresh();
+		if (AhiGram::Storage::Settings::Instance().data().ahiBypass.current()) {
+			_proxyAutobot->refresh();
+		}
 	});
 }
 
