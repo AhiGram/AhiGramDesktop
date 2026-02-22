@@ -2,3 +2,4 @@
 "ahigram_bypass_title" = "Сеть"; 
 "ahigram_bypass_slowdown_title" = "Автоматический прокси (бета)";
 "ahigram_intro_title" = "Добро пожаловать в AhiGram Desktop, форк проекта Telegram.\nБезопасность, настраиваемые функции и переработанный интерфейс.";
+"ahigram_update_title" = "Обновить AhiGram";

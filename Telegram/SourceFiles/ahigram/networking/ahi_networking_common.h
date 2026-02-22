@@ -30,6 +30,8 @@ namespace Constants {
 inline const std::vector<QString> kProxyChannels = {
     u"ProxyMTProto"_q,
     u"TelMTProto"_q,
+    u"drproxy_channel"_q,
+    u"ProxyMTProto_tel"_q,
 };
 
 constexpr auto kHistoryLimit = 20;

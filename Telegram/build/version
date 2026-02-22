@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 AppVersion         6007005
 AppVersionStrMajor 6.7
 AppVersionStrSmall 6.7.5
@@ -5,3 +6,12 @@ AppVersionStr      6.7.5
 BetaChannel        0
 AlphaVersion       0
 AppVersionOriginal 6.7.5
+=======
+AppVersion         6004000
+AppVersionStrMajor 6.4
+AppVersionStrSmall 6.4
+AppVersionStr      6.4.0
+BetaChannel        0
+AlphaVersion       0
+AppVersionOriginal 6.4.0
+>>>>>>> 330ca61b2d (feat(update): switch to AhiGram update servers and Packer config)
