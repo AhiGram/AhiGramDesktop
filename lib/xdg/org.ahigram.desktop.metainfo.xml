@@ -24,7 +24,7 @@
         <category>InstantMessaging</category>
     </categories>
     <developer id="ahigram"><name>https://t.me/AhiGram</name></developer>
-    <url type="homepage">http://127.0.0.1:3000/</url>
+    <url type="homepage">https://ahigram.online</url>
     <url type="faq">https://t.me/AhiGramFAQ</url>
     <url type="bugtracker">https://github.com/telegramdesktop/tdesktop/issues</url>
     <url type="translate">https://translations.telegram.org/</url>
