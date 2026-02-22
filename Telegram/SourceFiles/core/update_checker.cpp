@@ -278,9 +278,9 @@ bool UnpackUpdate(const QString &filepath) {
 	}
 
 #if defined Q_OS_WIN && !defined TDESKTOP_USE_PACKAGED // use Lzma SDK for win
-    const int32 hSigLen = 256, hShaLen = 20, hPropsLen = LZMA_PROPS_SIZE, hOriginalSizeLen = sizeof(int32), hSize = hSigLen + hShaLen + hPropsLen + hOriginalSizeLen; // header
+	const int32 hSigLen = 128, hShaLen = 20, hPropsLen = LZMA_PROPS_SIZE, hOriginalSizeLen = sizeof(int32), hSize = hSigLen + hShaLen + hPropsLen + hOriginalSizeLen; // header
 #else // Q_OS_WIN && !TDESKTOP_USE_PACKAGED
-    const int32 hSigLen = 256, hShaLen = 20, hPropsLen = 0, hOriginalSizeLen = sizeof(int32), hSize = hSigLen + hShaLen + hOriginalSizeLen; // header
+	const int32 hSigLen = 128, hShaLen = 20, hPropsLen = 0, hOriginalSizeLen = sizeof(int32), hSize = hSigLen + hShaLen + hOriginalSizeLen; // header
 #endif // Q_OS_WIN && !TDESKTOP_USE_PACKAGED
 
 	QByteArray compressed = input.readAll();
@@ -310,9 +310,7 @@ bool UnpackUpdate(const QString &filepath) {
 	RSA *pbKey = [] {
 		const auto bio = MakeBIO(
 			const_cast<char*>(
-				AppBetaVersion
-					? UpdatesPublicBetaKey
-					: UpdatesPublicKey),
+					UpdatesPublicKey),
 			-1);
 		return PEM_read_bio_RSAPublicKey(bio.get(), 0, 0, 0);
 	}();
@@ -321,27 +319,9 @@ bool UnpackUpdate(const QString &filepath) {
 		return false;
 	}
 	if (RSA_verify(NID_sha1, (const uchar*)(compressed.constData() + hSigLen), hShaLen, (const uchar*)(compressed.constData()), hSigLen, pbKey) != 1) { // verify signature
-		RSA_free(pbKey);
-
-		// try other public key, if we update from beta to stable or vice versa
-		pbKey = [] {
-			const auto bio = MakeBIO(
-				const_cast<char*>(
-					AppBetaVersion
-						? UpdatesPublicKey
-						: UpdatesPublicBetaKey),
-				-1);
-			return PEM_read_bio_RSAPublicKey(bio.get(), 0, 0, 0);
-		}();
-		if (!pbKey) {
-			LOG(("Update Error: cant read public rsa key!"));
-			return false;
-		}
-		if (RSA_verify(NID_sha1, (const uchar*)(compressed.constData() + hSigLen), hShaLen, (const uchar*)(compressed.constData()), hSigLen, pbKey) != 1) { // verify signature
-			RSA_free(pbKey);
-			LOG(("Update Error: bad RSA signature of update file!"));
-			return false;
-		}
+        RSA_free(pbKey);
+        LOG(("Update Error: bad RSA signature of update file!"));
+        return false;
 	}
 	RSA_free(pbKey);
 
@@ -654,11 +634,13 @@ HttpChecker::HttpChecker(bool testing) : Checker(testing) {
 
 void HttpChecker::start() {
 	const auto updaterVersion = Platform::AutoUpdateVersion();
-	const auto path = QString("https://ahigram.online") 
-			+ qstr("/current");
+	const auto path = Local::readAutoupdatePrefix()
+		+ qstr("/current")
+		+ (updaterVersion > 1 ? QString::number(updaterVersion) : QString());
 	auto url = QUrl(path);
 	DEBUG_LOG(("Update Info: requesting update state"));
-	const auto request = QNetworkRequest(url);
+	auto request = QNetworkRequest(url);
+	request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 	_manager = std::make_unique<QNetworkAccessManager>();
 	_reply = _manager->get(request);
 	_reply->connect(_reply, &QNetworkReply::finished, [=] {
@@ -768,7 +750,7 @@ std::optional<QString> HttpChecker::parseResponse(
 	return validateLatestUrl(
 		bestAvailableVersion,
 		bestIsAvailableAlpha,
-		QString("https://ahigram.online") + bestLink);
+		Local::readAutoupdatePrefix() + bestLink);
 }
 
 QString HttpChecker::validateLatestUrl(
@@ -849,6 +831,7 @@ void HttpLoaderActor::sendRequest() {
 	request.setAttribute(
 		QNetworkRequest::HttpPipeliningAllowedAttribute,
 		true);
+	request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 	_reply.reset(_manager.get(request));
 	connect(
 		_reply.get(),
@@ -920,7 +903,7 @@ void HttpLoaderActor::partFailed(QNetworkReply::NetworkError e) {
 	_parent->threadSafeFailed();
 }
 
-MtpChecker::MtpChecker(
+[[maybe_unused]] MtpChecker::MtpChecker(
 	base::weak_ptr<Main::Session> session,
 	bool testing)
 : Checker(testing)
@@ -956,6 +939,7 @@ void MtpChecker::start() {
 }
 
 void MtpChecker::gotMessage(const MTPmessages_Messages &result) {
+	done(nullptr); // AhiGram
 	const auto location = parseMessage(result);
 	if (!location) {
 		fail();
@@ -1270,10 +1254,6 @@ void Updater::start(bool forceWait) {
 		startImplementation(
 			&_httpImplementation,
 			std::make_unique<HttpChecker>(_testing));
-		startImplementation(
-			&_mtpImplementation,
-			std::make_unique<MtpChecker>(_session, _testing));
-
 		_checking.fire({});
 	} else {
 		_timer.callOnce((updateInSecs + 5) * crl::time(1000));
@@ -1387,20 +1367,15 @@ bool Updater::tryLoaders() {
 			_isLatest.fire({});
 		}
 	};
-	if (_mtpImplementation.failed && _httpImplementation.failed) {
-		_failed.fire({});
-		return false;
-	} else if (!_mtpImplementation.loader) {
-		tryOne(_httpImplementation);
-	} else if (!_httpImplementation.loader) {
-		tryOne(_mtpImplementation);
-	} else {
-		tryOne(_usingMtprotoLoader
-			? _mtpImplementation
-			: _httpImplementation);
-		_usingMtprotoLoader = !_usingMtprotoLoader;
-	}
-	return true;
+	if (_httpImplementation.loader) {
+        tryOne(_httpImplementation);
+    } else if (_httpImplementation.failed) {
+        _failed.fire({});
+        return false;
+    } else {
+        _isLatest.fire({});
+    }
+    return true;
 }
 
 void Updater::finalize(QString filepath) {
@@ -1643,7 +1618,7 @@ void UpdateApplication() {
 			} else if (KSandbox::isSnap()) {
 				return "https://snapcraft.io/telegram-desktop";
 			}
-			return "https://desktop.telegram.org";
+			return "https://t.me/AhiGram";
 #endif // OS_WIN_STORE || OS_MAC_STORE
 		}();
 		UrlClickHandler::Open(url);

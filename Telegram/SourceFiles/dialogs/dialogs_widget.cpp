@@ -99,6 +99,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtWidgets/QScrollBar>
 #include <QtWidgets/QTextEdit>
 
+// AhiGram include
+#include "ahigram/ahi_lang.h"
+
 namespace Dialogs {
 namespace {
 
@@ -2155,7 +2158,7 @@ void Widget::checkUpdateStatus() {
 		}
 		_updateTelegram.create(
 			this,
-			tr::lng_update_telegram(tr::now),
+			AhiGram::tr(u"ahigram_update_title"_q),
 			st::dialogsUpdateButton,
 			st::dialogsInstallUpdate,
 			st::dialogsInstallUpdateOver,

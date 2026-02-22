@@ -13,24 +13,23 @@ bool OnlyAlphaKey = false;
 
 const char *PublicKey = "\
 -----BEGIN RSA PUBLIC KEY-----\n\
-MIGJAoGBAMA4ViQrjkPZ9xj0lrer3r23JvxOnrtE8nI69XLGSr+sRERz9YnUptnU\n\
-BZpkIfKaRcl6XzNJiN28cVwO1Ui5JSa814UAiDHzWUqCaXUiUEQ6NmNTneiGx2sQ\n\
-+9PKKlb8mmr3BB9A45ZNwLT6G9AK3+qkZLHojeSA+m84/a6GP4svAgMBAAE=\n\
+MIGJAoGBAMEougzeYH0hZqpQwaWknk2OeQyZ6GXMC6mVu6CR5Waufmch760qHeg6\n\
+K9ilZLCx72+/u1wKskXgW2qz5N2H2LGmgeWEihxUE5QfvOJe+xaUN+9k/QI4qHd8\n\
+DJfSNkh3NwuJTTpQuDS70vsfS8DikwhwvusyKrBDIzOum1YfVyrtAgMBAAE=\n\
 -----END RSA PUBLIC KEY-----\
 ";
 
 const char *PublicBetaKey = "\
 -----BEGIN RSA PUBLIC KEY-----\n\
-MIGJAoGBALWu9GGs0HED7KG7BM73CFZ6o0xufKBRQsdnq3lwA8nFQEvmdu+g/I1j\n\
-0LQ+0IQO7GW4jAgzF/4+soPDb6uHQeNFrlVx1JS9DZGhhjZ5rf65yg11nTCIHZCG\n\
-w/CVnbwQOw0g5GBwwFV3r0uTTvy44xx8XXxk+Qknu4eBCsmrAFNnAgMBAAE=\n\
+MIGJAoGBAMEougzeYH0hZqpQwaWknk2OeQyZ6GXMC6mVu6CR5Waufmch760qHeg6\n\
+K9ilZLCx72+/u1wKskXgW2qz5N2H2LGmgeWEihxUE5QfvOJe+xaUN+9k/QI4qHd8\n\
+DJfSNkh3NwuJTTpQuDS70vsfS8DikwhwvusyKrBDIzOum1YfVyrtAgMBAAE=\n\
 -----END RSA PUBLIC KEY-----\
 ";
 
 extern const char *PrivateKey;
 extern const char *PrivateBetaKey;
-#include "../../../../DesktopPrivate/packer_private.h" // RSA PRIVATE KEYS for update signing
-#include "../../../../DesktopPrivate/alpha_private.h" // private key for alpha version file generation
+#include "packer_private.h" // RSA PRIVATE KEYS for update signing
 
 QString countAlphaVersionSignature(quint64 version);
 

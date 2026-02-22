@@ -23,9 +23,9 @@
         <category>Network</category>
         <category>InstantMessaging</category>
     </categories>
-    <developer id="org.telegram"><name>Telegram FZ-LLC</name></developer>
-    <url type="homepage">https://desktop.telegram.org/</url>
-    <url type="faq">https://telegram.org/faq</url>
+    <developer id="ahigram"><name>https://t.me/AhiGram</name></developer>
+    <url type="homepage">http://127.0.0.1:3000/</url>
+    <url type="faq">https://t.me/AhiGramFAQ</url>
     <url type="bugtracker">https://github.com/telegramdesktop/tdesktop/issues</url>
     <url type="translate">https://translations.telegram.org/</url>
     <url type="vcs-browser">https://github.com/telegramdesktop/tdesktop</url>

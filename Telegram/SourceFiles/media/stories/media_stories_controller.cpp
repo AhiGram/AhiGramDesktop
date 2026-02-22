@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "media/stories/media_stories_controller.h"
 
+#include "ahigram/ahi_lang.h"
 #include "base/platform/base_platform_info.h"
 #include "base/power_save_blocker.h"
 #include "base/qt_signal_producer.h"
@@ -264,7 +265,7 @@ void Controller::Unsupported::setup(not_null<PeerData*> peer) {
 
 	_button = std::make_unique<Ui::RoundButton>(
 		wrap,
-		tr::lng_update_telegram(),
+		AhiGram::trReactive(u"ahigram_update_title"_q),
 		st::storiesUnsupportedUpdate);
 	_button->setTextTransform(Ui::RoundButton::TextTransform::NoTransform);
 	_button->show();
