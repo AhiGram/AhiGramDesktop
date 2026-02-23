@@ -40,7 +40,7 @@ ProxyCandidate ProxyParser::FromLink(const QString &link) {
     
     auto cleanLinkView = QStringView(link);
     while (!cleanLinkView.isEmpty() && (cleanLinkView.endsWith('.') || cleanLinkView.endsWith(')') || cleanLinkView.endsWith(']'))) {
-        cleanLinkView = cleanLinkView.first(cleanLinkView.size() - 1);
+        cleanLinkView = cleanLinkView.left(cleanLinkView.size() - 1);
     }
 
     const auto url = QUrl(cleanLinkView.toString());
