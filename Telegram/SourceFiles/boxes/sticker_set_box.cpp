@@ -772,9 +772,7 @@ void StickerSetBox::updateButtons() {
 			});
 		}();
 		if (_inner->notInstalled()) {
-			if (!_session->premium()
-				&& _session->premiumPossible()
-				&& _inner->premiumEmojiSet()) {
+			if (false) { // AhiGram
 				const auto &st = st::premiumPreviewDoubledLimitsBox;
 				setStyle(st);
 				auto button = CreateUnlockButton(
@@ -938,7 +936,7 @@ void StickerSetBox::Inner::applySet(const TLStickerSet &set) {
 	_selected = -1;
 	setCursor(style::cur_default);
 	const auto owner = &_session->data();
-	const auto premiumPossible = _session->premiumPossible();
+	// const auto premiumPossible = _session->premiumPossible();
 	set.match([&](const MTPDmessages_stickerSet &data) {
 		const auto &v = data.vdocuments().v;
 		_pack.reserve(v.size());
@@ -950,7 +948,7 @@ void StickerSetBox::Inner::applySet(const TLStickerSet &set) {
 				continue;
 			}
 			_pack.push_back(document);
-			if (!document->isPremiumSticker() || premiumPossible) {
+			if (true) { // AhiGram
 				_elements.push_back({
 					document,
 					document->createMediaView(),
@@ -1468,6 +1466,10 @@ void StickerSetBox::Inner::contextMenuEvent(QContextMenuEvent *e) {
 				if (auto data = TextUtilities::MimeDataFromText(t)) {
 					QGuiApplication::clipboard()->setMimeData(data.release());
 				}
+			}, &st::menuIconCopy);
+			// AhiGram
+			_menu->addAction("Копировать ID"_q, [=, id = _pack[index]->id] {
+				TextUtilities::SetClipboardText({ QString::number(id) });
 			}, &st::menuIconCopy);
 		}
 	} else if (details.type != SendMenu::Type::Disabled) {

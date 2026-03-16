@@ -723,6 +723,11 @@ QString ReplyMarkupClickHandler::tooltip() const {
 				tr::now,
 				lt_text,
 				st::wrap_rtl(QString::fromUtf8(button->data)));
+		// AhiGram
+		} else if (button->type == HistoryMessageMarkupButton::Type::Callback
+			|| button->type == HistoryMessageMarkupButton::Type::CallbackWithPassword
+			|| button->type == HistoryMessageMarkupButton::Type::Game) {
+			return QString::fromUtf8(button->data);
 		}
 	}
 	const auto button = getUrlButton();

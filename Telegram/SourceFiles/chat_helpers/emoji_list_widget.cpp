@@ -1668,6 +1668,10 @@ void EmojiListWidget::fillRecentMenu(
 			addAction(tr::lng_emoji_copy(tr::now), [=] {
 				TextUtilities::SetClipboardText(data);
 			}, &st::menuIconCopy);
+			// AhiGram
+			addAction("Копировать ID"_q, [=] {
+				TextUtilities::SetClipboardText({ QString::number(document->id) });
+			}, &st::menuIconCopy);
 		}
 		if (recent && setId && _features.openStickerSets) {
 			addAction(
