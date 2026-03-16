@@ -19,7 +19,7 @@ It uses the official [Telegram API][telegram_api] and the secure [MTProto][teleg
 ## Proxy and Network Tools
 - **Smart MTProto Proxy Discovery** — automatically searches for available public proxies (including SOCKS5 and external sources). Proxy parsing logic is handled server-side and discovered proxies are stored locally to speed up future connections.
 - **Auto-Switching** — automatically connects to the fastest available proxy node.
-- **Slowdown Bypass** — traffic can be routed through a WebSocket tunnel without requiring manual configuration (based on [tg-ws-proxy](https://github.com/Flowseal/tg-ws-proxy)).
+- **Slowdown Bypass** — traffic can be routed through a WebSocket tunnel without requiring manual configuration (thanks [tg-ws-proxy](https://github.com/Flowseal/tg-ws-proxy)).
 - **Cleaner Chat List** — proxy promotion channels are hidden from the chat list.
 
 ## Developer Utilities
