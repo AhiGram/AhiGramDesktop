@@ -3,3 +3,4 @@
 "ahigram_bypass_slowdown_title" = "Automatic proxy (beta)";
 "ahigram_intro_title" = "Welcome to AhiGram Desktop, a fork of the Telegram project.\nSecurity, customizable features, and a redesigned interface.";
 "ahigram_update_title" = "Update AhiGram";
+"ahigram_copy_emoji_id" = "Copy ID";

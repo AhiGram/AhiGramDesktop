@@ -67,6 +67,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtGui/QClipboard>
 #include <QtSvg/QSvgRenderer>
 
+// AhiGram Include
+#include "ahigram/ahi_lang.h"
+
 namespace {
 
 constexpr auto kStickersPerRow = 5;
@@ -1468,7 +1471,7 @@ void StickerSetBox::Inner::contextMenuEvent(QContextMenuEvent *e) {
 				}
 			}, &st::menuIconCopy);
 			// AhiGram
-			_menu->addAction("Копировать ID"_q, [=, id = _pack[index]->id] {
+			_menu->addAction(AhiGram::tr(u"ahigram_copy_emoji_id"_q), [=, id = _pack[index]->id] {
 				TextUtilities::SetClipboardText({ QString::number(id) });
 			}, &st::menuIconCopy);
 		}

@@ -58,6 +58,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include <QtWidgets/QApplication>
 
+// AhiGram Include
+#include "ahigram/ahi_lang.h"
+
 namespace ChatHelpers {
 namespace {
 
@@ -1669,7 +1672,7 @@ void EmojiListWidget::fillRecentMenu(
 				TextUtilities::SetClipboardText(data);
 			}, &st::menuIconCopy);
 			// AhiGram
-			addAction("Копировать ID"_q, [=] {
+			addAction(AhiGram::tr(u"ahigram_copy_emoji_id"_q), [=] {
 				TextUtilities::SetClipboardText({ QString::number(document->id) });
 			}, &st::menuIconCopy);
 		}
