@@ -32,6 +32,7 @@ inline const std::vector<QString> kProxyChannels = {
     u"TelMTProto"_q,
     u"drproxy_channel"_q,
     u"ProxyMTProto_tel"_q,
+    u"ProxyFree_Ru"_q,
 };
 
 constexpr auto kHistoryLimit = 20;

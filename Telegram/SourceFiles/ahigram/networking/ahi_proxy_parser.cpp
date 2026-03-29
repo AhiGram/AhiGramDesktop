@@ -6,7 +6,7 @@ For license and copyright information please follow this link:
 https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 */
 
-#include "ahigram/networking/ahi_proxy_parser.h"
+#include "ahi_proxy_parser.h"
 
 #include <QtCore/QRegularExpression>
 #include <QtCore/QUrl>

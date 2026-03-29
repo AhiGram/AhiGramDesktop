@@ -6,9 +6,9 @@ For license and copyright information please follow this link:
 https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 */
 
-#include "ahigram/networking/ahi_proxy_autobot.h"
-#include "ahigram/networking/ahi_proxy_parser.h"
-#include "ahigram/networking/ahi_proxy_tester.h"
+#include "ahi_proxy_autobot.h"
+#include "ahi_proxy_parser.h"
+#include "ahi_proxy_tester.h"
 
 #include "ahigram/core/ahi_storage.h"
 

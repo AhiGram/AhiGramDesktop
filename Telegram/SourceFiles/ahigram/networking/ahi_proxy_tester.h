@@ -8,7 +8,7 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 
 #pragma once
 
-#include "ahigram/networking/ahi_networking_common.h"
+#include "ahi_networking_common.h"
 #include <vector>
 
 namespace MTP {
