@@ -1,0 +1,252 @@
+/*
+This file is part of AhiGram,
+a fork of Telegram Desktop for the Telegram messaging service.
+
+For license and copyright information please follow this link:
+https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
+*/
+
+#include "ahi_del_message_hook.h"
+#include "ahi_del_message_db.h"
+#include "ahigram/core/ahi_storage.h"
+
+#include "data/data_peer_id.h"
+#include "data/data_session.h"
+#include "history/history.h"
+#include "main/main_session.h"
+
+#include <crl/crl.h>
+
+#include <algorithm>
+#include <memory>
+#include <tuple>
+
+namespace AhiGram::DelMessage {
+
+namespace {
+
+std::vector<char> serializeMessage(const MTPMessage &msg) {
+    mtpBuffer buffer;
+    msg.write(buffer);
+    const auto bytes = reinterpret_cast<const char*>(buffer.constData());
+    return std::vector<char>(bytes, bytes + buffer.size() * sizeof(mtpPrime));
+}
+
+std::string extractMediaType(const MTPMessageMedia &media) {
+    switch (media.type()) {
+    case mtpc_messageMediaPhoto:        return "photo";
+    case mtpc_messageMediaDocument: {
+        const auto &doc = media.c_messageMediaDocument();
+        if (!doc.vdocument()) return "doc";
+        const auto &d = doc.vdocument()->c_document();
+        for (const auto &attr : d.vattributes().v) {
+            if (attr.type() == mtpc_documentAttributeVideo) {
+                const auto &v = attr.c_documentAttributeVideo();
+                if (v.is_round_message()) return "round";
+                return "video";
+            } else if (attr.type() == mtpc_documentAttributeAudio) {
+                const auto &a = attr.c_documentAttributeAudio();
+                if (a.is_voice()) return "audio_voice";
+                return "audio";
+            } else if (attr.type() == mtpc_documentAttributeSticker) {
+                return "sticker";
+            } else if (attr.type() == mtpc_documentAttributeAnimated) {
+                return "gif";
+            }
+        }
+        return "doc";
+    }
+    case mtpc_messageMediaGeo:
+    case mtpc_messageMediaGeoLive:      return "geo";
+    case mtpc_messageMediaContact:      return "contact";
+    case mtpc_messageMediaPoll:         return "poll";
+    case mtpc_messageMediaVenue:        return "venue";
+    default:                            return "";
+    }
+}
+
+SavedMessage parseMessage(const MTPDmessage &d) {
+    SavedMessage msg;
+
+    msg.peer_id = peerFromMTP(d.vpeer_id()).value;
+    msg.msg_id  = d.vid().v;
+    msg.date    = d.vdate().v;
+    msg.text    = d.vmessage().v.toStdString();
+
+    if (const auto from = d.vfrom_id()) {
+        msg.from_id = peerFromMTP(*from).value;
+    }
+
+    if (const auto rank = d.vfrom_rank()) {
+        msg.from_rank = rank->v.toStdString();
+    }
+
+    if (const auto reply = d.vreply_to()) {
+        if (reply->type() == mtpc_messageReplyHeader) {
+            const auto &r = reply->c_messageReplyHeader();
+            if (const auto id = r.vreply_to_msg_id()) {
+                msg.reply_to_id = id->v;
+            }
+        }
+    }
+
+    if (const auto fwd = d.vfwd_from()) {
+        const auto &f = fwd->c_messageFwdHeader();
+        if (const auto fromId = f.vfrom_id()) {
+            msg.fwd_from_id = peerFromMTP(*fromId).value;
+        }
+        if (const auto name = f.vfrom_name()) {
+            msg.fwd_from_name = name->v.toStdString();
+        }
+    }
+
+    if (const auto gid = d.vgrouped_id()) {
+        msg.grouped_id = gid->v;
+    }
+
+    if (const auto media = d.vmedia()) {
+        msg.media_type = extractMediaType(*media);
+    }
+
+    const auto flags = d.vflags().v;
+    msg.is_out        = (flags & MTPDmessage::Flag::f_out) ? 1 : 0;
+    msg.is_post       = (flags & MTPDmessage::Flag::f_post) ? 1 : 0;
+    msg.is_noforwards = (flags & MTPDmessage::Flag::f_noforwards) ? 1 : 0;
+
+    msg.is_deleted = 0;
+
+    return msg;
+}
+
+} // namespace 
+
+bool shouldSaveDeletedMessages() {
+	return AhiGram::Storage::Settings::Instance().data().saveDelMessage.current();
+}
+
+bool shouldLoadDeletedMessages() {
+	return AhiGram::Storage::Settings::Instance().data().loadDelMessage.current();
+}
+
+void onNewMessage(const MTPMessage &msg) {
+    if (msg.type() != mtpc_message) return;
+    if (!shouldSaveDeletedMessages()) {
+        return;
+    }
+
+    const auto &d = msg.c_message();
+    LOG(("AhiGram: onNewMessage peer=%1 msg=%2")
+        .arg(peerFromMTP(d.vpeer_id()).value)
+        .arg(d.vid().v));
+    auto saved = parseMessage(d);
+    saved.raw_mtp = serializeMessage(msg);
+
+    Database::Instance().upsertMessage(saved);
+}
+
+void onDeleteMessages(const QVector<MTPint> &ids) {
+    if (ids.isEmpty()) return;
+    if (!shouldSaveDeletedMessages()) {
+        return;
+    }
+
+    std::vector<int64_t> msgIds;
+    msgIds.reserve(ids.size());
+    for (const auto &id : ids) {
+        msgIds.push_back(id.v);
+    }
+
+    Database::Instance().markDeletedNonChannel(msgIds);
+}
+
+
+void onDeleteChannelMessages(PeerId peerId, const QVector<MTPint> &ids) {
+    if (ids.isEmpty()) return;
+    if (!shouldSaveDeletedMessages()) {
+        return;
+    }
+
+    std::vector<int64_t> msgIds;
+    msgIds.reserve(ids.size());
+    for (const auto &id : ids) {
+        msgIds.push_back(id.v);
+    }
+
+    Database::Instance().markDeletedBatch(peerId.value, msgIds);
+}
+
+MTPMessage deserializeMessage(const std::vector<char> &raw_mtp) {
+    const auto primes = reinterpret_cast<const mtpPrime*>(raw_mtp.data());
+    const auto count = raw_mtp.size() / sizeof(mtpPrime);
+    auto from = primes;
+    const auto end = primes + count;
+    MTPMessage msg;
+    if (!msg.read(from, end)) {
+        return MTPMessage();
+    }
+    return msg;
+}
+
+} // namespace AhiGram::DelMessage
+
+namespace {
+
+struct RestoreState final {
+	std::vector<AhiGram::DelMessage::SavedMessage> messages;
+	int index = 0;
+};
+
+void ProcessRestoreBatch(
+		not_null<Data::Session*> session,
+		const std::shared_ptr<RestoreState> &state) {
+	constexpr auto kBatch = 32;
+	const auto &messages = state->messages;
+	const auto n = int(messages.size());
+	const auto end = std::min(state->index + kBatch, n);
+	for (; state->index < end; ++state->index) {
+		const auto &saved = messages[state->index];
+		if (saved.raw_mtp.empty()) {
+			continue;
+		}
+		const auto peerId = PeerId(saved.peer_id);
+		if (!peerIsUser(peerId)) {
+			continue;
+		}
+		const auto mtp = AhiGram::DelMessage::deserializeMessage(saved.raw_mtp);
+		if (mtp.type() != mtpc_message) {
+			continue;
+		}
+		session->history(peerId)->ahiRestoreDeletedMessage(mtp);
+	}
+	if (state->index < n) {
+		crl::on_main(&session->session(), [=] {
+			ProcessRestoreBatch(session, state);
+		});
+	} else {
+		session->sendHistoryChangeNotifications();
+	}
+}
+
+} // namespace
+
+namespace AhiGram::DelMessage {
+
+void restoreDeletedPrivateMessages(not_null<Data::Session*> session) {
+	if (!shouldLoadDeletedMessages()) {
+		return;
+	}
+	auto all = Database::Instance().getAllDeletedUserMessages();
+	if (all.empty()) {
+		return;
+	}
+	std::sort(all.begin(), all.end(), [](const SavedMessage &a, const SavedMessage &b) {
+		return std::tie(a.peer_id, a.msg_id) < std::tie(b.peer_id, b.msg_id);
+	});
+	auto state = std::make_shared<RestoreState>();
+	state->messages = std::move(all);
+	crl::on_main(&session->session(), [=] {
+		ProcessRestoreBatch(session, state);
+	});
+}
+
+} // namespace AhiGram::DelMessage

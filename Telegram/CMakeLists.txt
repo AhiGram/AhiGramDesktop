@@ -108,6 +108,9 @@ set(ahigram_source_files
     ahigram/core/ahi_main.h
     ahigram/core/ahi_storage.cpp
     ahigram/core/ahi_storage.h
+    ahigram/library/sqlite/sqlite3.c
+    ahigram/library/sqlite/sqlite3.h
+    ahigram/library/sqlite/sqlite_orm.h
     ahigram/networking/ahi_proxy_autobot.cpp
     ahigram/networking/ahi_proxy_autobot.h
     ahigram/networking/ahi_networking_common.h
@@ -119,6 +122,10 @@ set(ahigram_source_files
     ahigram/ui/ahi_suggestions.h
     ahigram/ui/settings/ahi_settings_menu.cpp
     ahigram/ui/settings/ahi_settings_menu.h
+    ahigram/features/del_message/ahi_del_message_db.h
+    ahigram/features/del_message/ahi_del_message_db.cpp
+    ahigram/features/del_message/ahi_del_message_hook.h
+    ahigram/features/del_message/ahi_del_message_hook.cpp
 )
 
 target_precompile_headers(Telegram PRIVATE $<$<COMPILE_LANGUAGE:CXX,OBJCXX>:${src_loc}/stdafx.h>)
@@ -2121,7 +2128,11 @@ set(entitlement_sources
 target_sources(Telegram PRIVATE ${entitlement_sources})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Telegram PREFIX Resources FILES ${entitlement_sources})
 
-target_include_directories(Telegram PRIVATE ${src_loc})
+target_include_directories(Telegram
+PRIVATE
+    ${src_loc}
+    ${src_loc}/ahigram/library/sqlite
+)
 
 target_compile_definitions(Telegram
 PRIVATE

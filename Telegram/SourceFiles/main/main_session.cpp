@@ -130,7 +130,6 @@ Session::Session(
 , _locationPickers(std::make_unique<Data::LocationPickers>())
 , _credits(std::make_unique<Data::Credits>(this))
 , _promoSuggestions(std::make_unique<Data::PromoSuggestions>(this, [=] {
-	AhiGram::Initialize(this); // AhiGram Initialize LOG
 	using State = Data::SetupEmailState;
 	if (_promoSuggestions->setupEmailState() == State::Setup
 		|| _promoSuggestions->setupEmailState() == State::SetupNoSkip) {
@@ -245,6 +244,7 @@ Session::Session(
 		data().stickers().notifyUpdated(Data::StickersType::Masks);
 		data().stickers().notifyUpdated(Data::StickersType::Emoji);
 		data().stickers().notifySavedGifsUpdated();
+		AhiGram::Initialize(this); // AhiGram
 		DEBUG_LOG(("Init: Account stored data load finished."));
 	} }).dispatch();
 

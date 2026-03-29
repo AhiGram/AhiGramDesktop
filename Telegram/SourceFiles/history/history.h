@@ -462,6 +462,8 @@ public:
 
 	void refreshHiddenLinksItems();
 
+	void ahiRestoreDeletedMessage(const MTPMessage &message); // AhiGram
+
 	const not_null<PeerData*> peer;
 
 	// Still public data.

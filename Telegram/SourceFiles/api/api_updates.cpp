@@ -70,6 +70,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "apiwrap.h"
 #include "ui/text/format_values.h" // Ui::FormatPhone
 
+// AhiGram Include
+#include "ahigram/features/del_message/ahi_del_message_hook.h"
+
 namespace Api {
 namespace {
 
@@ -1195,8 +1198,7 @@ void Updates::applyUpdatesNoPtsCheck(const MTPUpdates &updates) {
 		const auto &d = updates.c_updateShortMessage();
 		const auto flags = mtpCastFlags(d.vflags().v)
 			| MTPDmessage::Flag::f_from_id;
-		_session->data().addNewMessage(
-			MTP_message(
+		const auto mtpMsg = MTP_message( // AhiGram
 				MTP_flags(flags),
 				d.vid(),
 				(d.is_out()
@@ -1231,7 +1233,11 @@ void Updates::applyUpdatesNoPtsCheck(const MTPUpdates &updates) {
 				MTPlong(), // paid_message_stars
 				MTPSuggestedPost(),
 				MTPint(), // schedule_repeat_period
-				MTPstring()), // summary_from_language
+				MTPstring()); // summary_from_language
+		// AhiGram
+		AhiGram::DelMessage::onNewMessage(mtpMsg);
+		_session->data().addNewMessage(
+			mtpMsg,
 			MessageFlags(),
 			NewMessageType::Unread);
 	} break;
@@ -1240,8 +1246,7 @@ void Updates::applyUpdatesNoPtsCheck(const MTPUpdates &updates) {
 		const auto &d = updates.c_updateShortChatMessage();
 		const auto flags = mtpCastFlags(d.vflags().v)
 			| MTPDmessage::Flag::f_from_id;
-		_session->data().addNewMessage(
-			MTP_message(
+		const auto mtpMsg = MTP_message( // AhiGram
 				MTP_flags(flags),
 				d.vid(),
 				MTP_peerUser(d.vfrom_id()),
@@ -1274,7 +1279,11 @@ void Updates::applyUpdatesNoPtsCheck(const MTPUpdates &updates) {
 				MTPlong(), // paid_message_stars
 				MTPSuggestedPost(),
 				MTPint(), // schedule_repeat_period
-				MTPstring()), // summary_from_language
+				MTPstring()); // summary_from_language
+		// AhiGram
+		AhiGram::DelMessage::onNewMessage(mtpMsg);
+		_session->data().addNewMessage(
+			mtpMsg,
 			MessageFlags(),
 			NewMessageType::Unread);
 	} break;
@@ -1295,6 +1304,10 @@ void Updates::applyUpdateNoPtsCheck(const MTPUpdate &update) {
 		auto needToAdd = true;
 		if (d.vmessage().type() == mtpc_message) { // index forwarded messages to links _overview
 			const auto &data = d.vmessage().c_message();
+			
+			// AhiGram save message in local database
+			AhiGram::DelMessage::onNewMessage(d.vmessage());
+
 			if (_session->data().updateExistingMessage(data)) { // already in blocks
 				LOG(("Skipping message, because it is already in blocks!"));
 				needToAdd = false;
@@ -1383,6 +1396,8 @@ void Updates::applyUpdateNoPtsCheck(const MTPUpdate &update) {
 
 	case mtpc_updateDeleteMessages: {
 		auto &d = update.c_updateDeleteMessages();
+		// AhiGram
+		AhiGram::DelMessage::onDeleteMessages(d.vmessages().v);
 		_session->data().processNonChannelMessagesDeleted(d.vmessages().v);
 	} break;
 
@@ -1391,6 +1406,10 @@ void Updates::applyUpdateNoPtsCheck(const MTPUpdate &update) {
 		auto needToAdd = true;
 		if (d.vmessage().type() == mtpc_message) { // index forwarded messages to links _overview
 			const auto &data = d.vmessage().c_message();
+
+            // AhiGram save message in local database
+            AhiGram::DelMessage::onNewMessage(d.vmessage());
+
 			if (_session->data().updateExistingMessage(data)) { // already in blocks
 				LOG(("Skipping message, because it is already in blocks!"));
 				needToAdd = false;
@@ -1433,6 +1452,10 @@ void Updates::applyUpdateNoPtsCheck(const MTPUpdate &update) {
 
 	case mtpc_updateDeleteChannelMessages: {
 		auto &d = update.c_updateDeleteChannelMessages();
+		// AhiGram
+		AhiGram::DelMessage::onDeleteChannelMessages(
+			peerFromChannel(d.vchannel_id().v),
+			d.vmessages().v);
 		_session->data().processMessagesDeleted(
 			peerFromChannel(d.vchannel_id().v),
 			d.vmessages().v);

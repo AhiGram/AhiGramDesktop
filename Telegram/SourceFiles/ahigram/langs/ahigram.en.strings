@@ -4,3 +4,7 @@
 "ahigram_intro_title" = "Welcome to AhiGram Desktop, a fork of the Telegram project.\nSecurity, customizable features, and a redesigned interface.";
 "ahigram_update_title" = "Update AhiGram";
 "ahigram_copy_emoji_id" = "Copy ID";
+"ahigram_delete_message" = "deleted";
+"ahigram_delmsg_section" = "Deleted messages";
+"ahigram_save_del_message" = "Save deleted locally";
+"ahigram_load_del_message" = "Restore deleted on startup";

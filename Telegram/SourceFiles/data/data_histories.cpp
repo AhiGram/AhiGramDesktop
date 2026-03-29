@@ -31,6 +31,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "core/application.h"
 #include "apiwrap.h"
 
+// AhiGram Include
+#include "ahigram/features/del_message/ahi_del_message_hook.h"
+
 namespace Data {
 namespace {
 
@@ -493,6 +496,8 @@ void Histories::applyPeerDialogs(const MTPmessages_PeerDialogs &dialogs) {
 			folder->applyDialog(data);
 		});
 	}
+	// AhiGram
+	AhiGram::DelMessage::restoreDeletedPrivateMessages(_owner);
 	_owner->sendHistoryChangeNotifications();
 }
 

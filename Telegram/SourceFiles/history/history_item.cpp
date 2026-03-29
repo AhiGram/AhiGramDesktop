@@ -7933,3 +7933,9 @@ void HistoryItem::overrideMedia(std::unique_ptr<Data::Media> media) {
 
 	_media = std::move(media);
 }
+
+// AhiGram 
+void HistoryItem::setAhiDeleted() {
+    _flags |= MessageFlag::AhiDeleted;
+    _history->owner().notifyItemDataChange(this);
+}

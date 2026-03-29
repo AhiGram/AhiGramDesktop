@@ -366,6 +366,9 @@ enum class MessageFlag : uint64 {
 	HasUnreadPollVote     = (1ULL << 59),
 
 	TextAppearing         = (1ULL << 60),
+
+    // AhiGram
+    AhiDeleted            = (1ULL << 61),
 };
 inline constexpr bool is_flag_type(MessageFlag) { return true; }
 using MessageFlags = base::flags<MessageFlag>;

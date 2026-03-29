@@ -8,6 +8,8 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 
 #pragma once
 
+#include "rpl/variable.h"
+
 #include <QtCore/QString>
 #include <QtCore/QVariantMap>
 
@@ -16,6 +18,8 @@ namespace AhiGram {
 class SettingsData {
 public:
     rpl::variable<bool> ahiBypass = { true };
+    rpl::variable<bool> saveDelMessage = { true };
+    rpl::variable<bool> loadDelMessage = { true };
 
     [[nodiscard]] QVariantMap toMap() const;
     void fillFromMap(const QVariantMap &map);

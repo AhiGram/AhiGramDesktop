@@ -3923,6 +3923,79 @@ void History::insertMessageToBlocks(not_null<HistoryItem*> item) {
 	finishBuildingFrontBlock();
 }
 
+// AhiGram
+void History::ahiRestoreDeletedMessage(const MTPMessage &message) {
+	if (message.type() != mtpc_message) {
+		return;
+	}
+	const auto id = IdFromMessage(message);
+	if (!IsServerMsgId(id)) {
+		return;
+	}
+	if (owner().message(peer->id, id)) {
+		return;
+	}
+	const auto wasEmpty = isEmpty();
+	const auto item = createItem(
+		id,
+		message,
+		MessageFlags(),
+		false,
+		false);
+	item->setAhiDeleted();
+	insertMessageToBlocks(item);
+	if (!wasEmpty && item->isRegular()) {
+		const auto from = loadedAtTop() ? 0 : minMsgId();
+		const auto till = loadedAtBottom() ? ServerMaxMsgId : maxMsgId();
+		if (_messages) {
+			_messages->addExisting(item->id, { from, till });
+		}
+		if (const auto types = item->sharedMediaTypes()) {
+			auto &storage = session().storage();
+			storage.add(Storage::SharedMediaAddExisting(
+				peer->id,
+				MsgId(0),
+				PeerId(0),
+				types,
+				item->id,
+				{ from, till }));
+			if (types.test(Storage::SharedMediaType::Pinned)) {
+				setHasPinnedMessages(true);
+			}
+			if (const auto topic = item->topic()) {
+				storage.add(Storage::SharedMediaAddExisting(
+					peer->id,
+					topic->rootId(),
+					PeerId(),
+					types,
+					item->id,
+					{ item->id, item->id }));
+				if (types.test(Storage::SharedMediaType::Pinned)) {
+					topic->setHasPinnedMessages(true);
+				}
+			}
+			if (const auto sublist = item->savedSublist()) {
+				storage.add(Storage::SharedMediaAddExisting(
+					peer->id,
+					MsgId(),
+					item->sublistPeerId(),
+					types,
+					item->id,
+					{ item->id, item->id }));
+				if (types.test(Storage::SharedMediaType::Pinned)) {
+					sublist->setHasPinnedMessages(true);
+				}
+			}
+		}
+	}
+	session().changes().messageUpdated(
+		item,
+		Data::MessageUpdate::Flag::NewAdded);
+	if (!wasEmpty) {
+		owner().notifyHistoryChangeDelayed(this);
+	}
+}
+
 void History::checkLocalMessages() {
 	if (isEmpty() && (!loadedAtTop() || !loadedAtBottom())) {
 		return;

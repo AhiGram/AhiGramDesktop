@@ -18,11 +18,17 @@ namespace AhiGram {
 QVariantMap SettingsData::toMap() const {
     return {
         { u"ahiBypass"_q, ahiBypass.current() },
+        { u"saveDelMessage"_q, saveDelMessage.current() },
+        { u"loadDelMessage"_q, loadDelMessage.current() },
     };
 }
 
 void SettingsData::fillFromMap(const QVariantMap &map) {
     ahiBypass.force_assign(map.value(u"ahiBypass"_q, ahiBypass.current()).toBool());
+    saveDelMessage.force_assign(
+        map.value(u"saveDelMessage"_q, saveDelMessage.current()).toBool());
+    loadDelMessage.force_assign(
+        map.value(u"loadDelMessage"_q, loadDelMessage.current()).toBool());
 }
 
 namespace Storage {
@@ -54,6 +60,8 @@ Settings::Settings() {
     };
 
     _data.ahiBypass.changes() | rpl::on_next(markDirty, _lifetime);
+    _data.saveDelMessage.changes() | rpl::on_next(markDirty, _lifetime);
+    _data.loadDelMessage.changes() | rpl::on_next(markDirty, _lifetime);
 }
 
 Settings::~Settings() {

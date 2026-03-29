@@ -7,14 +7,15 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 */
 
 #include "ahi_main.h"
+#include "ahigram/features/del_message/ahi_del_message_db.h"
+#include "ahigram/features/del_message/ahi_del_message_hook.h"
 
 #include "main/main_session.h"
 
 namespace AhiGram {
 
 void Initialize(not_null<Main::Session *> session) {
-  LOG(("AhiGram: Initializing for session %1...")
-          .arg(QString::number(session->userId().bare)));
+    AhiGram::DelMessage::Database::Instance().init();
 }
 
 } // namespace AhiGram

@@ -36,6 +36,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_credits.h"
 #include "styles/style_dialogs.h"
 
+// AhiGram
+#include "ahigram/ahi_lang.h"
+
 namespace HistoryView {
 namespace {
 
@@ -138,6 +141,7 @@ int BottomInfo::firstLineWidth() const {
 
 bool BottomInfo::isWide() const {
 	return (_data.flags & Data::Flag::Edited)
+		|| (_data.flags & Data::Flag::AhiDeleted)
 		|| _data.scheduleRepeatPeriod
 		|| !_data.author.isEmpty()
 		|| !_views.isEmpty()
@@ -446,6 +450,10 @@ void BottomInfo::layout() {
 }
 
 void BottomInfo::layoutDateText() {
+	// AhiGram
+	const auto ahiDeleted = (_data.flags & Data::Flag::AhiDeleted)
+		? (AhiGram::tr(u"ahigram_delete_message"_q) + ' ')
+		: QString();
 	const auto edited = (_data.flags & Data::Flag::Edited)
 		? (tr::lng_edited(tr::now) + ' ')
 		: (_data.flags & Data::Flag::EstimateDate)
@@ -453,9 +461,10 @@ void BottomInfo::layoutDateText() {
 		: _data.scheduleRepeatPeriod
 		? (SchedulePeriodText(_data.scheduleRepeatPeriod) + ' ')
 		: QString();
+	const auto prefix_deleted = !ahiDeleted.isEmpty() ? ahiDeleted : QString(); // AhiGram
 	const auto author = _data.author;
 	const auto prefix = !author.isEmpty() ? u", "_q : QString();
-	const auto date = edited + ((_data.flags & Data::Flag::ForwardedDate)
+	const auto date = prefix_deleted + edited + ((_data.flags & Data::Flag::ForwardedDate) // AhiGram Edited
 		? Ui::FormatDateTimeSavedFrom(_data.date)
 		: QLocale().toString(_data.date.time(), QLocale::ShortFormat));
 	const auto afterAuthor = prefix + date;
@@ -637,6 +646,10 @@ BottomInfo::Data BottomInfoDataFromMessage(not_null<Message*> message) {
 	}
 	if (message->displayedEditDate()) {
 		result.flags |= Flag::Edited;
+	}
+	// AhiGram
+	if (item->isAhiDeleted()) {
+		result.flags |= Flag::AhiDeleted;
 	}
 	if (const auto views = item->Get<HistoryMessageViews>()) {
 		if (views->views.count >= 0) {

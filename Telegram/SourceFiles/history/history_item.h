@@ -328,6 +328,11 @@ public:
 	[[nodiscard]] bool hideEditedBadge() const {
 		return (_flags & MessageFlag::HideEdited);
 	}
+	// AhiGram
+	[[nodiscard]] bool isAhiDeleted() const {
+		return _flags & MessageFlag::AhiDeleted;
+	}
+	void setAhiDeleted();
 	[[nodiscard]] bool hideDisplayDate() const {
 		return isEmpty() || (_flags & MessageFlag::HideDisplayDate);
 	}
