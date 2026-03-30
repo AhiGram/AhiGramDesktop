@@ -16,6 +16,7 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include "rpl/producer.h"
 #include "rpl/range.h"
 #include "rpl/filter.h"
+#include "rpl/merge.h"
 #include "rpl/variable.h"
 #include "settings/settings_common_session.h"
 #include "settings/settings_common.h"
@@ -26,9 +27,75 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include "window/window_session_controller.h"
 
 #include "styles/style_ahi_settings.h"
+#include "styles/style_menu_icons.h"
 #include "styles/style_settings.h"
 
+#include "ui/widgets/continuous_sliders.h"
+
+#include "base/basic_types.h"
 #include "base/timer.h"
+
+namespace {
+
+void SetupDeletedMessageOpacity(
+		not_null<Ui::VerticalLayout*> container,
+		AhiGram::SettingsData &settings) {
+	const auto button = Settings::AddButtonWithIcon(
+		container,
+		AhiGram::trReactive(u"ahigram_deleted_opacity_title"_q),
+		st::settingsButton,
+		{ &st::menuIconShowInChat });
+	button->toggleOn(rpl::single(settings.deletedMessageOpacityEnabled.current()));
+	button->toggledChanges(
+	) | rpl::on_next([&settings](bool enabled) {
+		settings.deletedMessageOpacityEnabled.force_assign(enabled);
+	}, container->lifetime());
+
+	constexpr auto kMin = 30;
+	constexpr auto kMax = 100;
+	const auto valuesCount = kMax - kMin + 1;
+
+	auto sliderWithLabel = Settings::MakeSliderWithLabel(
+		container,
+		st::settingsScale,
+		st::settingsScaleLabel,
+		st::normalFont->spacew * 2,
+		st::settingsScaleLabel.style.font->width("100%"),
+		true);
+	const auto opacityRow = sliderWithLabel.widget.data();
+	container->add(
+		std::move(sliderWithLabel.widget),
+		st::settingsScalePadding);
+	const auto slider = sliderWithLabel.slider;
+	const auto label = sliderWithLabel.label;
+	slider->setAccessibleName(AhiGram::tr(u"ahigram_deleted_opacity_title"_q));
+
+	const auto updateLabel = [=](int percent) {
+		label->setText(QString::number(percent) + u'%');
+	};
+	updateLabel(settings.deletedMessageOpacityPercent.current());
+
+	slider->setPseudoDiscrete(
+		valuesCount,
+		[=](int index) { return kMin + index; },
+		settings.deletedMessageOpacityPercent.current(),
+		[=, &settings](int percent) {
+			updateLabel(percent);
+			if (settings.deletedMessageOpacityEnabled.current()) {
+				settings.deletedMessageOpacityPercent.force_assign(percent);
+			}
+		});
+
+	opacityRow->setVisible(settings.deletedMessageOpacityEnabled.current());
+	rpl::merge(
+		rpl::single(settings.deletedMessageOpacityEnabled.current()),
+		settings.deletedMessageOpacityEnabled.changes()
+	) | rpl::on_next([=](bool enabled) {
+		opacityRow->setVisible(enabled);
+	}, container->lifetime());
+}
+
+} // namespace
 
 namespace Settings {
 
@@ -119,6 +186,9 @@ void AhiMainSettings::setupContent() {
         settings.data().loadDelMessage.force_assign(toggled);
         scheduleRestartPrompt();
     }, content->lifetime());
+
+    Ui::AddSkip(content);
+    SetupDeletedMessageOpacity(not_null(content), settings.data());
 
     Ui::ResizeFitChild(this, content);
 }

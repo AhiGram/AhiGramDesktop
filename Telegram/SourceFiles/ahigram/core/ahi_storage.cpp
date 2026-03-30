@@ -13,6 +13,8 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include <QtCore/QFile>
 #include <QtCore/QDir>
 
+#include <algorithm>
+
 namespace AhiGram {
 
 QVariantMap SettingsData::toMap() const {
@@ -20,6 +22,8 @@ QVariantMap SettingsData::toMap() const {
         { u"ahiBypass"_q, ahiBypass.current() },
         { u"saveDelMessage"_q, saveDelMessage.current() },
         { u"loadDelMessage"_q, loadDelMessage.current() },
+        { u"deletedMessageOpacityEnabled"_q, deletedMessageOpacityEnabled.current() },
+        { u"deletedMessageOpacityPercent"_q, deletedMessageOpacityPercent.current() },
     };
 }
 
@@ -29,6 +33,13 @@ void SettingsData::fillFromMap(const QVariantMap &map) {
         map.value(u"saveDelMessage"_q, saveDelMessage.current()).toBool());
     loadDelMessage.force_assign(
         map.value(u"loadDelMessage"_q, loadDelMessage.current()).toBool());
+    deletedMessageOpacityEnabled.force_assign(map.value(
+        u"deletedMessageOpacityEnabled"_q,
+        deletedMessageOpacityEnabled.current()).toBool());
+    const auto rawPercent = map.value(
+        u"deletedMessageOpacityPercent"_q,
+        deletedMessageOpacityPercent.current()).toInt();
+    deletedMessageOpacityPercent.force_assign(std::clamp(rawPercent, 30, 100));
 }
 
 namespace Storage {
@@ -62,6 +73,8 @@ Settings::Settings() {
     _data.ahiBypass.changes() | rpl::on_next(markDirty, _lifetime);
     _data.saveDelMessage.changes() | rpl::on_next(markDirty, _lifetime);
     _data.loadDelMessage.changes() | rpl::on_next(markDirty, _lifetime);
+    _data.deletedMessageOpacityEnabled.changes() | rpl::on_next(markDirty, _lifetime);
+    _data.deletedMessageOpacityPercent.changes() | rpl::on_next(markDirty, _lifetime);
 }
 
 Settings::~Settings() {

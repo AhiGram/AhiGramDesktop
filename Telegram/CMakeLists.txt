@@ -126,6 +126,8 @@ set(ahigram_source_files
     ahigram/features/del_message/ahi_del_message_db.cpp
     ahigram/features/del_message/ahi_del_message_hook.h
     ahigram/features/del_message/ahi_del_message_hook.cpp
+    ahigram/utils/ahi_deleted_message_visual.cpp
+    ahigram/utils/ahi_deleted_message_visual.h
 )
 
 target_precompile_headers(Telegram PRIVATE $<$<COMPILE_LANGUAGE:CXX,OBJCXX>:${src_loc}/stdafx.h>)

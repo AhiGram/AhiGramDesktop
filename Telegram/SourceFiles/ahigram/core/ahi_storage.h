@@ -20,6 +20,8 @@ public:
     rpl::variable<bool> ahiBypass = { true };
     rpl::variable<bool> saveDelMessage = { true };
     rpl::variable<bool> loadDelMessage = { true };
+    rpl::variable<bool> deletedMessageOpacityEnabled = { true };
+    rpl::variable<int> deletedMessageOpacityPercent = { 50 };
 
     [[nodiscard]] QVariantMap toMap() const;
     void fillFromMap(const QVariantMap &map);

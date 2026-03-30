@@ -88,6 +88,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_chat.h"
 #include "styles/style_window.h" // columnMaximalWidthLeft
 
+// AhiGram
+#include "ahigram/utils/ahi_deleted_message_visual.h"
+
 #include <QtWidgets/QApplication>
 #include <QtCore/QMimeData>
 
@@ -505,6 +508,9 @@ ListWidget::ListWidget(
 	) | rpl::on_next([=] {
 		update();
 	}, lifetime());
+
+	// AhiGram
+	AhiGram::SubscribeDeletedOpacityRepaint(lifetime(), [=] { update(); });
 
 	_session->data().itemRemoved(
 	) | rpl::on_next([=](not_null<const HistoryItem*> item) {

@@ -8,3 +8,4 @@
 "ahigram_delmsg_section" = "Deleted messages";
 "ahigram_save_del_message" = "Save deleted locally";
 "ahigram_load_del_message" = "Restore deleted on startup";
+"ahigram_deleted_opacity_title" = "Deleted dim level";

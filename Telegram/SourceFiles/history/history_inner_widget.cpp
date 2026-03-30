@@ -120,6 +120,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_chat_helpers.h"
 #include "styles/style_menu_icons.h"
 
+// AhiGram
+#include "ahigram/utils/ahi_deleted_message_visual.h"
+
 #include <QtGui/QClipboard>
 #include <QtWidgets/QApplication>
 #include <QtCore/QCoreApplication>
@@ -429,6 +432,7 @@ HistoryInner::HistoryInner(
 	) | rpl::on_next([=] {
 		update();
 	}, lifetime());
+	AhiGram::SubscribeDeletedOpacityRepaint(lifetime(), [=] { update(); }); // AhiGram
 	session().data().itemRemoved(
 	) | rpl::on_next(
 		[this](auto item) { itemRemoved(item); },

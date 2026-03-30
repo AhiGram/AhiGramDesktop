@@ -60,6 +60,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_dialogs.h"
 #include "styles/style_polls.h"
 
+// AhiGram
+#include "ahigram/utils/ahi_deleted_message_visual.h"
+
 namespace HistoryView {
 namespace {
 
@@ -968,6 +971,11 @@ void Message::draw(Painter &p, const PaintContext &context) const {
 	}
 
 	const auto item = data();
+	// AhiGram
+	const AhiGram::DeletedMessagePainterOpacityGuard ahiDeletedOpacity(
+		p,
+		item->isAhiDeleted());
+
 	const auto media = this->media();
 
 	const auto hasGesture = context.gestureHorizontal.translation
