@@ -8,6 +8,7 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 
 #include "ahi_settings_menu.h"
 #include "ahigram/core/ahi_storage.h"
+#include "ahigram/features/del_message/ahi_del_message_db.h"
 #include "ahigram/ahi_lang.h"
 
 #include "core/application.h"
@@ -16,7 +17,6 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include "rpl/producer.h"
 #include "rpl/range.h"
 #include "rpl/filter.h"
-#include "rpl/merge.h"
 #include "rpl/variable.h"
 #include "settings/settings_common_session.h"
 #include "settings/settings_common.h"
@@ -35,11 +35,92 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include "base/basic_types.h"
 #include "base/timer.h"
 
+namespace Settings {
 namespace {
+
+void SetupAhiBypass(
+		not_null<Ui::VerticalLayout*> container,
+		AhiGram::SettingsData &settings) {
+	const auto bypassInitial = settings.ahiBypass.current();
+	Ui::AddSkip(container);
+	Ui::AddSubsectionTitle(container, AhiGram::trReactive(u"ahigram_bypass_title"_q));
+
+	const auto bypassButton = container->add(
+		object_ptr<Ui::SettingsButton>(
+			container,
+			AhiGram::trReactive(u"ahigram_bypass_slowdown_title"_q),
+			st::ahiSettingsButtonNoIcon));
+
+	bypassButton->toggleOn(rpl::single(bypassInitial));
+
+	bypassButton->toggledChanges(
+	) | rpl::on_next([=, &settings](bool toggled) {
+		settings.ahiBypass.force_assign(toggled);
+	}, container->lifetime());
+}
+
+void SetupDelMessageOptions(
+		not_null<Ui::VerticalLayout*> container,
+		not_null<Window::SessionController*> controller,
+		AhiGram::SettingsData &settings) {
+	Ui::AddSkip(container);
+	Ui::AddDivider(container);
+	Ui::AddSkip(container);
+	Ui::AddSubsectionTitle(container, AhiGram::trReactive(u"ahigram_delmsg_section"_q));
+
+	const auto saveInitial = settings.saveDelMessage.current();
+	const auto loadInitial = settings.loadDelMessage.current();
+
+	const auto saveButton = container->add(
+		object_ptr<Ui::SettingsButton>(
+			container,
+			AhiGram::trReactive(u"ahigram_save_del_message"_q),
+			st::ahiSettingsButtonNoIcon));
+	saveButton->toggleOn(rpl::single(saveInitial));
+
+	const auto loadButton = container->add(
+		object_ptr<Ui::SettingsButton>(
+			container,
+			AhiGram::trReactive(u"ahigram_load_del_message"_q),
+			st::ahiSettingsButtonNoIcon));
+	loadButton->toggleOn(rpl::single(loadInitial));
+
+	const auto restartTimer = container->lifetime().make_state<base::Timer>();
+	restartTimer->setCallback([=] {
+		controller->show(Ui::MakeConfirmBox({
+			.text = tr::lng_settings_need_restart(),
+			.confirmed = [] { Core::Restart(); },
+			.confirmText = tr::lng_settings_restart_now(),
+			.cancelText = tr::lng_settings_restart_later(),
+		}));
+	});
+	const auto scheduleRestartPrompt = [=] {
+		restartTimer->callOnce(st::settingsButtonNoIcon.toggle.duration);
+	};
+
+	saveButton->toggledChanges(
+	) | rpl::filter([&settings](bool toggled) {
+		return toggled != settings.saveDelMessage.current();
+	}) | rpl::on_next([=, &settings](bool toggled) {
+		settings.saveDelMessage.force_assign(toggled);
+	}, container->lifetime());
+
+	loadButton->toggledChanges(
+	) | rpl::filter([&settings](bool toggled) {
+		return toggled != settings.loadDelMessage.current();
+	}) | rpl::on_next([=, &settings](bool toggled) {
+		settings.loadDelMessage.force_assign(toggled);
+		scheduleRestartPrompt();
+	}, container->lifetime());
+}
 
 void SetupDeletedMessageOpacity(
 		not_null<Ui::VerticalLayout*> container,
 		AhiGram::SettingsData &settings) {
+	Ui::AddSkip(container);
+	Ui::AddDivider(container);
+	Ui::AddSkip(container);
+
 	const auto button = Settings::AddButtonWithIcon(
 		container,
 		AhiGram::trReactive(u"ahigram_deleted_opacity_title"_q),
@@ -81,116 +162,88 @@ void SetupDeletedMessageOpacity(
 		settings.deletedMessageOpacityPercent.current(),
 		[=, &settings](int percent) {
 			updateLabel(percent);
-			if (settings.deletedMessageOpacityEnabled.current()) {
-				settings.deletedMessageOpacityPercent.force_assign(percent);
-			}
+			settings.deletedMessageOpacityPercent.force_assign(percent);
 		});
 
-	opacityRow->setVisible(settings.deletedMessageOpacityEnabled.current());
-	rpl::merge(
-		rpl::single(settings.deletedMessageOpacityEnabled.current()),
-		settings.deletedMessageOpacityEnabled.changes()
-	) | rpl::on_next([=](bool enabled) {
-		opacityRow->setVisible(enabled);
-	}, container->lifetime());
+	opacityRow->setVisible(true);
+}
+
+void SetupClearDeletedMessages(
+		not_null<Ui::VerticalLayout*> container,
+		not_null<Window::SessionController*> controller) {
+	Ui::AddSkip(container);
+	Ui::AddDivider(container);
+	Ui::AddSkip(container);
+
+	const auto cleanupSizeBytes = [] {
+		const auto info = AhiGram::DelMessage::Database::Instance().cleanupInfo();
+		return info.second;
+	};
+
+	const auto formatMb = [](int64_t bytes) {
+		if (bytes <= 0) {
+			return u"0MB"_q;
+		}
+		const auto mb = double(bytes) / (1024.0 * 1024.0);
+		const auto mbStr = (mb < 10.)
+			? (QString::number(mb, 'f', 1) + u"MB"_q)
+			: (QString::number(static_cast<qint64>(mb + 0.5)) + u"MB"_q);
+		return mbStr;
+	};
+
+	const auto computeTitle = [&] {
+		return AhiGram::tr(u"ahigram_clear_deleted_messages"_q)
+			+ u" ( "
+			+ formatMb(cleanupSizeBytes())
+			+ u" )";
+	};
+
+	const auto clearTitle = computeTitle();
+	const auto clearTitleValue = container->lifetime().make_state<rpl::variable<QString>>(clearTitle);
+
+	const auto clearButton = Settings::AddButtonWithIcon(
+		container,
+		clearTitleValue->value(),
+		st::ahiSettingsButton,
+		{ &st::menuIconDelete });
+	clearButton->setClickedCallback([=] {
+		controller->show(Ui::MakeConfirmBox({
+			.text = AhiGram::tr(u"ahigram_clear_deleted_messages_confirm"_q),
+			.confirmed = [=](Fn<void()> close) {
+				AhiGram::DelMessage::Database::Instance().clearDeletedMessages();
+				*clearTitleValue = computeTitle();
+				close();
+			},
+			.confirmText = tr::lng_box_ok(),
+			.cancelText = tr::lng_box_no(),
+		}));
+	});
 }
 
 } // namespace
 
-namespace Settings {
-
 AhiMainSettings::AhiMainSettings(
-    QWidget *parent,
-    not_null<Window::SessionController*> controller)
+		QWidget *parent,
+		not_null<Window::SessionController*> controller)
 : Section<AhiMainSettings>(parent, controller)
 , _controller(controller) {
-    setupContent();
+	setupContent();
 }
 
 rpl::producer<QString> AhiMainSettings::title() {
-    return AhiGram::trReactive(u"ahigram_settings_title"_q);
+	return AhiGram::trReactive(u"ahigram_settings_title"_q);
 }
 
 void AhiMainSettings::setupContent() {
-    const auto content = Ui::CreateChild<Ui::VerticalLayout>(this);
-    auto &settings = ::AhiGram::Storage::Settings::Instance();
+	const auto content = Ui::CreateChild<Ui::VerticalLayout>(this);
+	auto &settings = ::AhiGram::Storage::Settings::Instance().data();
 
-    const auto bypassInitial = settings.data().ahiBypass.current();
-    Ui::AddSubsectionTitle(content, AhiGram::trReactive(u"ahigram_bypass_title"_q));
-    Ui::AddSkip(content);
+	SetupAhiBypass(not_null(content), settings);
+	SetupDelMessageOptions(not_null(content), _controller, settings);
+	SetupDeletedMessageOpacity(not_null(content), settings);
+	SetupClearDeletedMessages(not_null(content), _controller);
 
-    const auto bypassButton = content->add(
-        object_ptr<Ui::SettingsButton>(
-            content,
-            AhiGram::trReactive(u"ahigram_bypass_slowdown_title"_q),
-            st::ahiSettingsButtonNoIcon
-        )
-    );
-
-    bypassButton->toggleOn(rpl::single(bypassInitial));
-
-    bypassButton->toggledChanges(
-    ) | rpl::on_next([=, &settings](bool toggled) {
-        settings.data().ahiBypass.force_assign(toggled);
-    }, content->lifetime());
-
-    Ui::AddSkip(content);
-    Ui::AddSubsectionTitle(content, AhiGram::trReactive(u"ahigram_delmsg_section"_q));
-    Ui::AddSkip(content);
-
-    const auto saveInitial = settings.data().saveDelMessage.current();
-    const auto loadInitial = settings.data().loadDelMessage.current();
-
-    const auto saveButton = content->add(
-        object_ptr<Ui::SettingsButton>(
-            content,
-            AhiGram::trReactive(u"ahigram_save_del_message"_q),
-            st::ahiSettingsButtonNoIcon
-        )
-    );
-    saveButton->toggleOn(rpl::single(saveInitial));
-
-    const auto loadButton = content->add(
-        object_ptr<Ui::SettingsButton>(
-            content,
-            AhiGram::trReactive(u"ahigram_load_del_message"_q),
-            st::ahiSettingsButtonNoIcon
-        )
-    );
-    loadButton->toggleOn(rpl::single(loadInitial));
-
-    const auto restartTimer = content->lifetime().make_state<base::Timer>();
-    restartTimer->setCallback([=] {
-        _controller->show(Ui::MakeConfirmBox({
-            .text = tr::lng_settings_need_restart(),
-            .confirmed = [] { Core::Restart(); },
-            .confirmText = tr::lng_settings_restart_now(),
-            .cancelText = tr::lng_settings_restart_later(),
-        }));
-    });
-    const auto scheduleRestartPrompt = [=] {
-        restartTimer->callOnce(st::settingsButtonNoIcon.toggle.duration);
-    };
-
-    saveButton->toggledChanges(
-    ) | rpl::filter([&settings](bool toggled) {
-        return toggled != settings.data().saveDelMessage.current();
-    }) | rpl::on_next([=, &settings](bool toggled) {
-        settings.data().saveDelMessage.force_assign(toggled);
-    }, content->lifetime());
-
-    loadButton->toggledChanges(
-    ) | rpl::filter([&settings](bool toggled) {
-        return toggled != settings.data().loadDelMessage.current();
-    }) | rpl::on_next([=, &settings](bool toggled) {
-        settings.data().loadDelMessage.force_assign(toggled);
-        scheduleRestartPrompt();
-    }, content->lifetime());
-
-    Ui::AddSkip(content);
-    SetupDeletedMessageOpacity(not_null(content), settings.data());
-
-    Ui::ResizeFitChild(this, content);
+	Ui::ResizeFitChild(this, content);
 }
 
 } // namespace Settings

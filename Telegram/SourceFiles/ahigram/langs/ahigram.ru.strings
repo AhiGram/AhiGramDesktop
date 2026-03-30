@@ -9,3 +9,5 @@
 "ahigram_save_del_message" = "Сохранять удалённые сообщения";
 "ahigram_load_del_message" = "Подгружать удалённые сообщения";
 "ahigram_deleted_opacity_title" = "Затемнение удалённых";
+"ahigram_clear_deleted_messages" = "Почистить Сообщения";
+"ahigram_clear_deleted_messages_confirm" = "Очистить всю базу данных удалённых сообщений?";

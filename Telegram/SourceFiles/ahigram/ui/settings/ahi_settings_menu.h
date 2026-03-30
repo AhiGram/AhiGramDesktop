@@ -16,13 +16,13 @@ namespace Settings {
 
 class AhiMainSettings : public Section<AhiMainSettings> {
 public:
-    AhiMainSettings(
-        QWidget *parent,
-        not_null<Window::SessionController*> controller);
+	AhiMainSettings(
+		QWidget *parent,
+		not_null<Window::SessionController*> controller);
 
     [[nodiscard]] rpl::producer<QString> title() override;
 private:
-    void setupContent();
+	void setupContent();
 
     const not_null<Window::SessionController*> _controller;
 };

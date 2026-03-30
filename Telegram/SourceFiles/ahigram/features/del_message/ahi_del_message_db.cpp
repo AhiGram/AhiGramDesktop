@@ -10,6 +10,7 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 
 #include <QtCore/QString>
 #include <QtCore/QDir>
+#include <QtCore/QFileInfo>
 #include <cstdint>
 #include <exception>
 #include <memory>
@@ -32,7 +33,8 @@ void Database::init() {
         QDir().mkpath(basePath);
     }
 
-    const auto dbPath = (basePath + u"ahigram_messages.sqlite"_q).toStdString();
+    _dbPath = basePath + u"ahigram_messages.sqlite"_q;
+    const auto dbPath = _dbPath.toStdString();
 
     _storage = std::make_unique<decltype(detail::makeSavedMessagesStorage(""))>(
         detail::makeSavedMessagesStorage(dbPath)
@@ -49,6 +51,33 @@ void Database::upsertMessage(const SavedMessage &msg) {
         _storage->replace(msg);
     } catch (const std::exception &e) {
         LOG(("AhiGram DB error (upsert): %1").arg(e.what()));
+    }
+}
+
+std::pair<int64_t, int64_t> Database::cleanupInfo() {
+    if (!_initialized) {
+        return { 0, 0 };
+    }
+
+    if (_dbPath.isEmpty()) {
+        return { 0, 0 };
+    }
+
+    const auto fileSizeBytes = int64_t(QFileInfo(_dbPath).size());
+    return { fileSizeBytes, fileSizeBytes };
+}
+
+void Database::clearDeletedMessages() {
+    if (!_initialized) return;
+    try {
+        using namespace sqlite_orm;
+        _storage->transaction([&] {
+            _storage->remove_all<SavedMessage>();
+            return true;
+        });
+        _storage->vacuum();
+    } catch (const std::exception &e) {
+        LOG(("AhiGram DB error (clearDeletedMessages): %1").arg(e.what()));
     }
 }
 
