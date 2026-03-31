@@ -20,6 +20,7 @@ namespace AhiGram {
 QVariantMap SettingsData::toMap() const {
     return {
         { u"ahiBypass"_q, ahiBypass.current() },
+        { u"disableTelegramAds"_q, disableTelegramAds.current() },
         { u"saveDelMessage"_q, saveDelMessage.current() },
         { u"loadDelMessage"_q, loadDelMessage.current() },
         { u"deletedMessageOpacityEnabled"_q, deletedMessageOpacityEnabled.current() },
@@ -29,6 +30,9 @@ QVariantMap SettingsData::toMap() const {
 
 void SettingsData::fillFromMap(const QVariantMap &map) {
     ahiBypass.force_assign(map.value(u"ahiBypass"_q, ahiBypass.current()).toBool());
+    disableTelegramAds.force_assign(map.value(
+        u"disableTelegramAds"_q,
+        disableTelegramAds.current()).toBool());
     saveDelMessage.force_assign(
         map.value(u"saveDelMessage"_q, saveDelMessage.current()).toBool());
     loadDelMessage.force_assign(
@@ -71,6 +75,7 @@ Settings::Settings() {
     };
 
     _data.ahiBypass.changes() | rpl::on_next(markDirty, _lifetime);
+    _data.disableTelegramAds.changes() | rpl::on_next(markDirty, _lifetime);
     _data.saveDelMessage.changes() | rpl::on_next(markDirty, _lifetime);
     _data.loadDelMessage.changes() | rpl::on_next(markDirty, _lifetime);
     _data.deletedMessageOpacityEnabled.changes() | rpl::on_next(markDirty, _lifetime);

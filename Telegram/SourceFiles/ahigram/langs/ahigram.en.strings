@@ -6,6 +6,8 @@
 "ahigram_copy_emoji_id" = "Copy ID";
 "ahigram_delete_message" = "deleted";
 "ahigram_delmsg_section" = "Deleted messages";
+"ahigram_ads_section" = "Advertising";
+"ahigram_disable_telegram_ads" = "Disable Ads";
 "ahigram_save_del_message" = "Save deleted locally";
 "ahigram_load_del_message" = "Restore deleted on startup";
 "ahigram_deleted_opacity_title" = "Deleted dim level";

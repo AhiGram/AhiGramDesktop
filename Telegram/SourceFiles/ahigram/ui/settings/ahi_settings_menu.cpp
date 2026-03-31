@@ -41,7 +41,6 @@ namespace {
 void SetupAhiBypass(
 		not_null<Ui::VerticalLayout*> container,
 		AhiGram::SettingsData &settings) {
-	const auto bypassInitial = settings.ahiBypass.current();
 	Ui::AddSkip(container);
 	Ui::AddSubsectionTitle(container, AhiGram::trReactive(u"ahigram_bypass_title"_q));
 
@@ -51,11 +50,36 @@ void SetupAhiBypass(
 			AhiGram::trReactive(u"ahigram_bypass_slowdown_title"_q),
 			st::ahiSettingsButtonNoIcon));
 
-	bypassButton->toggleOn(rpl::single(bypassInitial));
+	bypassButton->toggleOn(settings.ahiBypass.value());
 
 	bypassButton->toggledChanges(
 	) | rpl::on_next([=, &settings](bool toggled) {
 		settings.ahiBypass.force_assign(toggled);
+	}, container->lifetime());
+}
+
+void SetupDisableTelegramAds(
+		not_null<Ui::VerticalLayout*> container,
+		AhiGram::SettingsData &settings) {
+	Ui::AddSkip(container);
+	Ui::AddDivider(container);
+	Ui::AddSkip(container);
+	Ui::AddSubsectionTitle(
+		container,
+		AhiGram::trReactive(u"ahigram_ads_section"_q));
+
+	const auto disableAdsButton = container->add(
+		object_ptr<Ui::SettingsButton>(
+			container,
+			AhiGram::trReactive(u"ahigram_disable_telegram_ads"_q),
+			st::ahiSettingsButtonNoIcon));
+	disableAdsButton->toggleOn(settings.disableTelegramAds.value());
+
+	disableAdsButton->toggledChanges(
+	) | rpl::filter([&settings](bool toggled) {
+		return toggled != settings.disableTelegramAds.current();
+	}) | rpl::on_next([=, &settings](bool toggled) {
+		settings.disableTelegramAds.force_assign(toggled);
 	}, container->lifetime());
 }
 
@@ -239,6 +263,7 @@ void AhiMainSettings::setupContent() {
 	auto &settings = ::AhiGram::Storage::Settings::Instance().data();
 
 	SetupAhiBypass(not_null(content), settings);
+	SetupDisableTelegramAds(not_null(content), settings);
 	SetupDelMessageOptions(not_null(content), _controller, settings);
 	SetupDeletedMessageOpacity(not_null(content), settings);
 	SetupClearDeletedMessages(not_null(content), _controller);

@@ -26,6 +26,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/chat/sponsored_message_bar.h"
 #include "ui/text/text_utilities.h" // tr::rich.
 
+// AhiGram
+#include "ahigram/utils/ahi_ads_utils.h"
+
 namespace Data {
 namespace {
 
@@ -56,6 +59,13 @@ template <typename Fields>
 SponsoredMessages::SponsoredMessages(not_null<Main::Session*> session)
 : _session(session)
 , _clearTimer([=] { clearOldRequests(); }) {
+	// AhiGram
+	AhiGram::Storage::Settings::Instance().data().disableTelegramAds.value(
+	) | rpl::on_next([=](bool disabled) {
+		if (disabled) {
+			clear();
+		}
+	}, _lifetime);
 	Data::AmPremiumValue(
 		_session
 	) | rpl::on_next([=](bool premium) {
@@ -72,14 +82,18 @@ SponsoredMessages::~SponsoredMessages() {
 }
 
 void SponsoredMessages::clear() {
-	_lifetime.destroy();
 	for (const auto &request : base::take(_requests)) {
 		_session->api().request(request.second.requestId).cancel();
 	}
 	for (const auto &request : base::take(_viewRequests)) {
 		_session->api().request(request.second.requestId).cancel();
 	}
+	// AhiGram
+	for (const auto &request : base::take(_requestsForVideo)) {
+		_session->api().request(request.second.requestId).cancel();
+	}
 	base::take(_data);
+	base::take(_dataForVideo);
 }
 
 void SponsoredMessages::clearOldRequests() {
@@ -239,6 +253,10 @@ void SponsoredMessages::inject(
 }
 
 bool SponsoredMessages::canHaveFor(not_null<History*> history) const {
+	// AhiGram
+	if (AhiGram::AdsDisabled()) {
+		return false;
+	}
 	if (history->peer->isChannel()) {
 		return true;
 	} else if (const auto user = history->peer->asUser()) {
@@ -248,6 +266,10 @@ bool SponsoredMessages::canHaveFor(not_null<History*> history) const {
 }
 
 bool SponsoredMessages::canHaveFor(not_null<HistoryItem*> item) const {
+	// AhiGram
+	if (AhiGram::AdsDisabled()) {
+		return false;
+	}
 	return item->history()->peer->isBroadcast()
 		&& item->isRegular();
 }
@@ -263,6 +285,10 @@ bool SponsoredMessages::isTopBarFor(not_null<History*> history) const {
 
 void SponsoredMessages::request(not_null<History*> history, Fn<void()> done) {
 	if (!canHaveFor(history)) {
+		// AhiGram
+		if (done) {
+			done();
+		}
 		return;
 	}
 	auto &request = _requests[history];
@@ -453,6 +479,10 @@ SponsoredForVideo SponsoredMessages::prepareForVideo(
 FullMsgId SponsoredMessages::fillTopBar(
 		not_null<History*> history,
 		not_null<Ui::RpWidget*> widget) {
+	// AhiGram
+	if (AhiGram::AdsDisabled()) {
+		return {};
+	}
 	const auto it = _data.find(history);
 	if (it != end(_data)) {
 		auto &list = it->second;
