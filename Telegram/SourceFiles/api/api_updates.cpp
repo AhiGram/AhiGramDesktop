@@ -1234,8 +1234,6 @@ void Updates::applyUpdatesNoPtsCheck(const MTPUpdates &updates) {
 				MTPSuggestedPost(),
 				MTPint(), // schedule_repeat_period
 				MTPstring()); // summary_from_language
-		// AhiGram
-		AhiGram::DelMessage::onNewMessage(mtpMsg);
 		_session->data().addNewMessage(
 			mtpMsg,
 			MessageFlags(),
@@ -1280,8 +1278,6 @@ void Updates::applyUpdatesNoPtsCheck(const MTPUpdates &updates) {
 				MTPSuggestedPost(),
 				MTPint(), // schedule_repeat_period
 				MTPstring()); // summary_from_language
-		// AhiGram
-		AhiGram::DelMessage::onNewMessage(mtpMsg);
 		_session->data().addNewMessage(
 			mtpMsg,
 			MessageFlags(),
@@ -1304,9 +1300,6 @@ void Updates::applyUpdateNoPtsCheck(const MTPUpdate &update) {
 		auto needToAdd = true;
 		if (d.vmessage().type() == mtpc_message) { // index forwarded messages to links _overview
 			const auto &data = d.vmessage().c_message();
-			
-			// AhiGram save message in local database
-			AhiGram::DelMessage::onNewMessage(d.vmessage());
 
 			if (_session->data().updateExistingMessage(data)) { // already in blocks
 				LOG(("Skipping message, because it is already in blocks!"));
@@ -1396,8 +1389,6 @@ void Updates::applyUpdateNoPtsCheck(const MTPUpdate &update) {
 
 	case mtpc_updateDeleteMessages: {
 		auto &d = update.c_updateDeleteMessages();
-		// AhiGram
-		AhiGram::DelMessage::onDeleteMessages(d.vmessages().v);
 		_session->data().processNonChannelMessagesDeleted(d.vmessages().v);
 	} break;
 
@@ -1406,9 +1397,6 @@ void Updates::applyUpdateNoPtsCheck(const MTPUpdate &update) {
 		auto needToAdd = true;
 		if (d.vmessage().type() == mtpc_message) { // index forwarded messages to links _overview
 			const auto &data = d.vmessage().c_message();
-
-            // AhiGram save message in local database
-            AhiGram::DelMessage::onNewMessage(d.vmessage());
 
 			if (_session->data().updateExistingMessage(data)) { // already in blocks
 				LOG(("Skipping message, because it is already in blocks!"));
@@ -1452,10 +1440,6 @@ void Updates::applyUpdateNoPtsCheck(const MTPUpdate &update) {
 
 	case mtpc_updateDeleteChannelMessages: {
 		auto &d = update.c_updateDeleteChannelMessages();
-		// AhiGram
-		AhiGram::DelMessage::onDeleteChannelMessages(
-			peerFromChannel(d.vchannel_id().v),
-			d.vmessages().v);
 		_session->data().processMessagesDeleted(
 			peerFromChannel(d.vchannel_id().v),
 			d.vmessages().v);

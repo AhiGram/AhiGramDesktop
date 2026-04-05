@@ -2745,16 +2745,12 @@ void Session::processMessages(
 		const auto id = IdFromMessage(message); // Only 32 bit values here.
 		indices.emplace((uint64(uint32(id.bare)) << 32) | uint64(i), i);
 	}
-    for (const auto &[position, index] : indices) {
-        // AhiGram
-        if (AhiGram::DelMessage::shouldSaveDeletedMessages()) {
-            AhiGram::DelMessage::onNewMessage(data[index]);
-        }
-        addNewMessage(
-            data[index],
-            MessageFlags(),
-            type);
-    }
+	for (const auto &[position, index] : indices) {
+		addNewMessage(
+			data[index],
+			MessageFlags(),
+			type);
+	}
 }
 
 void Session::processMessages(
@@ -2922,14 +2918,24 @@ void Session::processMessagesDeleted(
 		const auto i = list ? list->find(messageId.v) : Messages::iterator();
 		if (list && i != list->end()) {
 			const auto history = i->second->history();
-			// AhiGram
-			if (AhiGram::DelMessage::shouldSaveDeletedMessages()
-				&& AhiGram::DelMessage::Database::Instance().hasMessage(
-					peerId.value, messageId.v)) {
-				AhiGram::DelMessage::Database::Instance().markDeleted(
-					peerId.value, messageId.v);
-				i->second->setAhiDeleted();
-				i->second->history()->owner().requestItemRepaint(i->second);
+			if (AhiGram::DelMessage::shouldSaveDeletedMessages()) {
+				if (!AhiGram::DelMessage::Database::Instance().hasMessage(
+						peerId.value,
+						messageId.v)) {
+					AhiGram::DelMessage::saveSnapshotFromItem(i->second);
+				} else {
+					AhiGram::DelMessage::Database::Instance().markDeleted(
+						peerId.value,
+						messageId.v);
+				}
+				if (AhiGram::DelMessage::Database::Instance().hasMessage(
+						peerId.value,
+						messageId.v)) {
+					i->second->setAhiDeleted();
+					i->second->history()->owner().requestItemRepaint(i->second);
+				} else {
+					i->second->destroy();
+				}
 			} else {
 				i->second->destroy();
 			}
@@ -2950,15 +2956,25 @@ void Session::processNonChannelMessagesDeleted(const QVector<MTPint> &data) {
 	for (const auto &messageId : data) {
 		if (const auto item = nonChannelMessage(messageId.v)) {
 			const auto history = item->history();
-			// AhiGram
 			const auto peerId = item->history()->peer->id;
-			if (AhiGram::DelMessage::shouldSaveDeletedMessages()
-				&& AhiGram::DelMessage::Database::Instance().hasMessage(
-					peerId.value, messageId.v)) {
-				AhiGram::DelMessage::Database::Instance().markDeleted(
-					peerId.value, messageId.v);
-				item->setAhiDeleted();
-				item->history()->owner().requestItemRepaint(item);
+			if (AhiGram::DelMessage::shouldSaveDeletedMessages()) {
+				if (!AhiGram::DelMessage::Database::Instance().hasMessage(
+						peerId.value,
+						messageId.v)) {
+					AhiGram::DelMessage::saveSnapshotFromItem(item);
+				} else {
+					AhiGram::DelMessage::Database::Instance().markDeleted(
+						peerId.value,
+						messageId.v);
+				}
+				if (AhiGram::DelMessage::Database::Instance().hasMessage(
+						peerId.value,
+						messageId.v)) {
+					item->setAhiDeleted();
+					item->history()->owner().requestItemRepaint(item);
+				} else {
+					item->destroy();
+				}
 			} else {
 				item->destroy();
 			}

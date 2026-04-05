@@ -10,9 +10,11 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include "ahi_del_message_db.h"
 #include "ahigram/core/ahi_storage.h"
 
+#include "api/api_text_entities.h"
 #include "data/data_peer_id.h"
 #include "data/data_session.h"
 #include "history/history.h"
+#include "history/history_item.h"
 #include "main/main_session.h"
 
 #include <crl/crl.h>
@@ -118,6 +120,63 @@ SavedMessage parseMessage(const MTPDmessage &d) {
     return msg;
 }
 
+[[nodiscard]] MTPMessage BuildMtpMessageFromItem(not_null<HistoryItem*> item) {
+	if (!item->isRegular()) {
+		return MTPMessage();
+	}
+	const auto history = item->history();
+	const auto peer = history->peer;
+	auto &main = history->session();
+
+	auto flags = MTPDmessage::Flags(MTPDmessage::Flag::f_from_id);
+	if (item->out()) {
+		flags |= MTPDmessage::Flag::f_out;
+	}
+
+	const auto &text = item->originalText();
+	const auto entities = Api::EntitiesToMTP(
+		&main,
+		text.entities,
+		Api::ConvertOption::WithLocal);
+
+	return MTP_message(
+		MTP_flags(flags),
+		MTP_int(item->id.bare),
+		(item->out()
+			? peerToMTP(main.userPeerId())
+			: peerToMTP(item->from()->id)),
+		MTPint(),
+		MTPstring(),
+		peerToMTP(peer->id),
+		MTPPeer(),
+		MTPMessageFwdHeader(),
+		MTP_long(0),
+		MTPlong(),
+		MTPMessageReplyHeader(),
+		MTP_int(item->date()),
+		MTP_string(text.text),
+		MTP_messageMediaEmpty(),
+		MTPReplyMarkup(),
+		entities,
+		MTPint(),
+		MTPint(),
+		MTPMessageReplies(),
+		MTPint(),
+		MTPstring(),
+		MTPlong(),
+		MTPMessageReactions(),
+		MTPVector<MTPRestrictionReason>(),
+		MTP_int(0),
+		MTPint(),
+		MTPlong(),
+		MTPFactCheck(),
+		MTPint(),
+		MTPlong(),
+		MTPSuggestedPost(),
+		MTPint(),
+		MTPstring());
+}
+
 } // namespace 
 
 bool shouldSaveDeletedMessages() {
@@ -128,51 +187,26 @@ bool shouldLoadDeletedMessages() {
 	return AhiGram::Storage::Settings::Instance().data().loadDelMessage.current();
 }
 
-void onNewMessage(const MTPMessage &msg) {
-    if (msg.type() != mtpc_message) return;
-    if (!shouldSaveDeletedMessages()) {
-        return;
-    }
-
-    const auto &d = msg.c_message();
-    LOG(("AhiGram: onNewMessage peer=%1 msg=%2")
-        .arg(peerFromMTP(d.vpeer_id()).value)
-        .arg(d.vid().v));
-    auto saved = parseMessage(d);
-    saved.raw_mtp = serializeMessage(msg);
-
-    Database::Instance().upsertMessage(saved);
-}
-
-void onDeleteMessages(const QVector<MTPint> &ids) {
-    if (ids.isEmpty()) return;
-    if (!shouldSaveDeletedMessages()) {
-        return;
-    }
-
-    std::vector<int64_t> msgIds;
-    msgIds.reserve(ids.size());
-    for (const auto &id : ids) {
-        msgIds.push_back(id.v);
-    }
-
-    Database::Instance().markDeletedNonChannel(msgIds);
-}
-
-
-void onDeleteChannelMessages(PeerId peerId, const QVector<MTPint> &ids) {
-    if (ids.isEmpty()) return;
-    if (!shouldSaveDeletedMessages()) {
-        return;
-    }
-
-    std::vector<int64_t> msgIds;
-    msgIds.reserve(ids.size());
-    for (const auto &id : ids) {
-        msgIds.push_back(id.v);
-    }
-
-    Database::Instance().markDeletedBatch(peerId.value, msgIds);
+void saveSnapshotFromItem(not_null<HistoryItem*> item) {
+	if (!shouldSaveDeletedMessages()) {
+		return;
+	}
+	if (!item->isRegular()) {
+		return;
+	}
+	const auto peerId = item->history()->peer->id;
+	if (!peerIsUser(peerId)) {
+		return;
+	}
+	const auto mtp = BuildMtpMessageFromItem(item);
+	if (mtp.type() != mtpc_message) {
+		return;
+	}
+	const auto &d = mtp.c_message();
+	auto saved = parseMessage(d);
+	saved.raw_mtp = serializeMessage(mtp);
+	saved.is_deleted = 1;
+	Database::Instance().upsertMessage(saved);
 }
 
 MTPMessage deserializeMessage(const std::vector<char> &raw_mtp) {
