@@ -9,6 +9,7 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #pragma once
 
 #include "base/basic_types.h"
+#include "data/data_peer_id.h"
 
 namespace Data {
 class Session;
@@ -24,5 +25,8 @@ namespace AhiGram::DelMessage {
 void saveSnapshotFromItem(not_null<HistoryItem*> item);
 
 void restoreDeletedPrivateMessages(not_null<Data::Session*> session);
+void restoreDeletedPrivateMessagesForPeer(
+	not_null<Data::Session*> session,
+	PeerId peerId);
 
 } // namespace AhiGram::DelMessage

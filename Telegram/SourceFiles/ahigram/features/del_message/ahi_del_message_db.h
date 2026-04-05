@@ -86,6 +86,8 @@ public:
     void clearDeletedMessages();
 
     [[nodiscard]] std::vector<SavedMessage> getAllDeletedUserMessages() const;
+    [[nodiscard]] std::vector<SavedMessage> getDeletedUserMessagesForPeer(
+        int64_t peerId) const;
     [[nodiscard]] bool hasMessage(int64_t peerId, int64_t msgId) const;
 
 private:

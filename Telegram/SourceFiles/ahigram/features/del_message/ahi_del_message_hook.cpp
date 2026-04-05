@@ -188,6 +188,7 @@ bool shouldLoadDeletedMessages() {
 }
 
 void saveSnapshotFromItem(not_null<HistoryItem*> item) {
+	Database::Instance().init();
 	if (!shouldSaveDeletedMessages()) {
 		return;
 	}
@@ -266,6 +267,7 @@ void ProcessRestoreBatch(
 namespace AhiGram::DelMessage {
 
 void restoreDeletedPrivateMessages(not_null<Data::Session*> session) {
+	Database::Instance().init();
 	if (!shouldLoadDeletedMessages()) {
 		return;
 	}
@@ -281,6 +283,34 @@ void restoreDeletedPrivateMessages(not_null<Data::Session*> session) {
 	crl::on_main(&session->session(), [=] {
 		ProcessRestoreBatch(session, state);
 	});
+}
+
+void restoreDeletedPrivateMessagesForPeer(
+		not_null<Data::Session*> session,
+		PeerId peerId) {
+	Database::Instance().init();
+	if (!shouldLoadDeletedMessages()) {
+		return;
+	}
+	if (!peerIsUser(peerId)) {
+		return;
+	}
+	const auto peerKey = static_cast<int64_t>(peerId.value);
+	auto rows = Database::Instance().getDeletedUserMessagesForPeer(peerKey);
+	if (rows.empty()) {
+		return;
+	}
+	for (const auto &saved : rows) {
+		if (saved.raw_mtp.empty()) {
+			continue;
+		}
+		const auto mtp = DeserializeSavedMtp(saved.raw_mtp);
+		if (mtp.type() != mtpc_message) {
+			continue;
+		}
+		session->history(peerId)->ahiRestoreDeletedMessage(mtp);
+	}
+	session->sendHistoryChangeNotifications();
 }
 
 } // namespace AhiGram::DelMessage

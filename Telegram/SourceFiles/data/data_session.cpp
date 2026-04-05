@@ -2919,6 +2919,7 @@ void Session::processMessagesDeleted(
 		if (list && i != list->end()) {
 			const auto history = i->second->history();
 			if (AhiGram::DelMessage::shouldSaveDeletedMessages()) {
+				AhiGram::DelMessage::Database::Instance().init();
 				if (!AhiGram::DelMessage::Database::Instance().hasMessage(
 						peerId.value,
 						messageId.v)) {
@@ -2957,8 +2958,8 @@ void Session::processNonChannelMessagesDeleted(const QVector<MTPint> &data) {
 		if (const auto item = nonChannelMessage(messageId.v)) {
 			const auto history = item->history();
 			const auto peerId = item->history()->peer->id;
-			// AhiGram
 			if (AhiGram::DelMessage::shouldSaveDeletedMessages()) {
+				AhiGram::DelMessage::Database::Instance().init();
 				if (!AhiGram::DelMessage::Database::Instance().hasMessage(
 						peerId.value,
 						messageId.v)) {

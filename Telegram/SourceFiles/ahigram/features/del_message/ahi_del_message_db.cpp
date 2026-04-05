@@ -27,6 +27,10 @@ Database &Database::Instance() {
 }
 
 void Database::init() {
+    if (_initialized) {
+        return;
+    }
+
     const auto basePath = cWorkingDir() + u"tdata/"_q;
     if (!QDir().exists(basePath)) {
         QDir().mkpath(basePath);
@@ -114,6 +118,26 @@ std::vector<SavedMessage> Database::getAllDeletedUserMessages() const {
         return userMessages;
     } catch (const std::exception &e) {
         LOG(("AhiGram DB error (getAllDeletedUserMessages): %1").arg(e.what()));
+    }
+    return {};
+}
+
+std::vector<SavedMessage> Database::getDeletedUserMessagesForPeer(
+        int64_t peerId) const {
+    if (!_initialized) {
+        return {};
+    }
+    try {
+        using namespace sqlite_orm;
+        return _storage->get_all<SavedMessage>(
+            where(
+                c(&SavedMessage::peer_id) == peerId
+                and c(&SavedMessage::is_deleted) == 1
+            ),
+            order_by(&SavedMessage::date).asc()
+        );
+    } catch (const std::exception &e) {
+        LOG(("AhiGram DB error (getDeletedUserMessagesForPeer): %1").arg(e.what()));
     }
     return {};
 }

@@ -3932,7 +3932,11 @@ void History::ahiRestoreDeletedMessage(const MTPMessage &message) {
 	if (!IsServerMsgId(id)) {
 		return;
 	}
-	if (owner().message(peer->id, id)) {
+	if (const auto existing = owner().message(peer->id, id)) {
+		if (!existing->isAhiDeleted()) {
+			existing->setAhiDeleted();
+			owner().requestItemRepaint(existing);
+		}
 		return;
 	}
 	const auto wasEmpty = isEmpty();

@@ -477,6 +477,9 @@ void Histories::dialogEntryApplied(not_null<History*> history) {
 		history->setInboxReadTill(base::take(state->sentReadTill));
 		checkEmptyState(history);
 	}
+	AhiGram::DelMessage::restoreDeletedPrivateMessagesForPeer(
+		_owner,
+		history->peer->id);
 }
 
 void Histories::applyPeerDialogs(const MTPmessages_PeerDialogs &dialogs) {
