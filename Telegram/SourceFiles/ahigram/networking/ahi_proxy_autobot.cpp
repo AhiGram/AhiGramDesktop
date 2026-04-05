@@ -30,7 +30,8 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 namespace AhiGram::Networking {
 
 ProxyAutobot::ProxyAutobot(not_null<Main::Session*> session)
-    : _session(session) {
+    : _session(session)
+    , _remoteLoader(std::make_unique<AhiGram::Api::RemoteProxyListLoader>()) {
     
     _session->account().mtp().restartsByTimeout()
     | rpl::on_next([=] {
@@ -79,9 +80,64 @@ void ProxyAutobot::refresh() {
     AHI_LOG(("AhiGram: ProxyAutobot refresh started..."));
     _isRefreshing = true;
     _fetchedCandidates.clear();
-    _pendingRequests = Constants::kProxyChannels.size();
 
-    fetchFromChannels();
+    fetchRemoteList();
+}
+
+void ProxyAutobot::fetchRemoteList() {
+    _remoteLoader->cancel();
+    _remoteLoader->load(
+        Constants::kRemoteProxyListUrl,
+        [=](std::vector<ProxyCandidate> list) {
+            for (auto &c : list) {
+                if (MTP::ProxyData::ValidMtprotoPassword(c.secret)) {
+                    _fetchedCandidates.push_back(std::move(c));
+                }
+            }
+            afterRemoteFetchFinished();
+        },
+        [=] {
+            AHI_LOG(("AhiGram: Remote proxy list request failed"));
+            afterRemoteFetchFinished();
+        });
+}
+
+void ProxyAutobot::afterRemoteFetchFinished() {
+    const auto channelCount = static_cast<int>(Constants::kProxyChannels.size());
+    if (shouldFetchChannels() && channelCount > 0) {
+        _pendingRequests = channelCount;
+        fetchFromChannels();
+    } else {
+        finalizeFetchAndTest();
+    }
+}
+
+bool ProxyAutobot::shouldFetchChannels() const {
+    if (_session->account().mtp().dcstate(0) != MTP::ConnectedState) {
+        return false;
+    }
+    const auto &proxySettings = Core::App().settings().proxy();
+    if (!proxySettings.isEnabled()) {
+        return false;
+    }
+    const auto &current = proxySettings.selected();
+    return current.type == MTP::ProxyData::Type::Mtproto;
+}
+
+void ProxyAutobot::finalizeFetchAndTest() {
+    if (!_fetchedCandidates.empty()) {
+        std::sort(_fetchedCandidates.begin(), _fetchedCandidates.end(), [](const ProxyCandidate &a, const ProxyCandidate &b) {
+            if (a.host != b.host) return a.host < b.host;
+            return a.port < b.port;
+        });
+        _fetchedCandidates.erase(std::unique(_fetchedCandidates.begin(), _fetchedCandidates.end(), [](const ProxyCandidate &a, const ProxyCandidate &b) {
+            return a.host == b.host && a.port == b.port;
+        }), _fetchedCandidates.end());
+
+        startTesting(std::move(_fetchedCandidates));
+    } else {
+        _isRefreshing = false;
+    }
 }
 
 void ProxyAutobot::fetchFromChannels() {
@@ -131,19 +187,7 @@ void ProxyAutobot::fetchFromChannels() {
 void ProxyAutobot::checkFetchFinished() {
     _pendingRequests--;
     if (_pendingRequests <= 0) {
-        if (!_fetchedCandidates.empty()) {
-            std::sort(_fetchedCandidates.begin(), _fetchedCandidates.end(), [](const ProxyCandidate &a, const ProxyCandidate &b) {
-                if (a.host != b.host) return a.host < b.host;
-                return a.port < b.port;
-            });
-            _fetchedCandidates.erase(std::unique(_fetchedCandidates.begin(), _fetchedCandidates.end(), [](const ProxyCandidate &a, const ProxyCandidate &b) {
-                return a.host == b.host && a.port == b.port;
-            }), _fetchedCandidates.end());
-
-            startTesting(std::move(_fetchedCandidates));
-        } else {
-            _isRefreshing = false;
-        }
+        finalizeFetchAndTest();
     }
 }
 

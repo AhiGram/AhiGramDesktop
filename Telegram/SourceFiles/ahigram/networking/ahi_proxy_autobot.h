@@ -10,6 +10,8 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 
 #include "ahi_networking_common.h"
 
+#include "ahigram/api/ahi_proxy_remote_api.h"
+
 #include <rpl/lifetime.h>
 #include <vector>
 #include <memory>
@@ -37,7 +39,11 @@ public:
     void refresh();
 
 private:
+    void fetchRemoteList();
     void fetchFromChannels();
+    void afterRemoteFetchFinished();
+    [[nodiscard]] bool shouldFetchChannels() const;
+    void finalizeFetchAndTest();
     void startTesting(std::vector<ProxyCandidate> &&candidates);
     void applyBest(const ProxyCandidate &best);
     
@@ -46,6 +52,8 @@ private:
     
     [[nodiscard]] bool isCurrentProxyOurs() const;
     void checkFetchFinished();
+
+    const std::unique_ptr<AhiGram::Api::RemoteProxyListLoader> _remoteLoader;
 
     const not_null<Main::Session*> _session;
     std::vector<ProxyCandidate> _workingCandidates;
