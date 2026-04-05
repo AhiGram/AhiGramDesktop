@@ -22,7 +22,6 @@ namespace AhiGram::DelMessage {
 [[nodiscard]] bool shouldLoadDeletedMessages();
 
 void saveSnapshotFromItem(not_null<HistoryItem*> item);
-MTPMessage deserializeMessage(const std::vector<char> &raw_mtp);
 
 void restoreDeletedPrivateMessages(not_null<Data::Session*> session);
 

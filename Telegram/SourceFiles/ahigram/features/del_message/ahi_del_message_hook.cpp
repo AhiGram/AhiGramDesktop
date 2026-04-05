@@ -209,21 +209,21 @@ void saveSnapshotFromItem(not_null<HistoryItem*> item) {
 	Database::Instance().upsertMessage(saved);
 }
 
-MTPMessage deserializeMessage(const std::vector<char> &raw_mtp) {
-    const auto primes = reinterpret_cast<const mtpPrime*>(raw_mtp.data());
-    const auto count = raw_mtp.size() / sizeof(mtpPrime);
-    auto from = primes;
-    const auto end = primes + count;
-    MTPMessage msg;
-    if (!msg.read(from, end)) {
-        return MTPMessage();
-    }
-    return msg;
-}
-
 } // namespace AhiGram::DelMessage
 
 namespace {
+
+[[nodiscard]] MTPMessage DeserializeSavedMtp(const std::vector<char> &raw_mtp) {
+	const auto primes = reinterpret_cast<const mtpPrime*>(raw_mtp.data());
+	const auto count = raw_mtp.size() / sizeof(mtpPrime);
+	auto from = primes;
+	const auto end = primes + count;
+	MTPMessage msg;
+	if (!msg.read(from, end)) {
+		return MTPMessage();
+	}
+	return msg;
+}
 
 struct RestoreState final {
 	std::vector<AhiGram::DelMessage::SavedMessage> messages;
@@ -246,7 +246,7 @@ void ProcessRestoreBatch(
 		if (!peerIsUser(peerId)) {
 			continue;
 		}
-		const auto mtp = AhiGram::DelMessage::deserializeMessage(saved.raw_mtp);
+		const auto mtp = DeserializeSavedMtp(saved.raw_mtp);
 		if (mtp.type() != mtpc_message) {
 			continue;
 		}

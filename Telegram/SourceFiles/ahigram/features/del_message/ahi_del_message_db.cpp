@@ -14,7 +14,6 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include <cstdint>
 #include <exception>
 #include <memory>
-#include <qdir.h>
 
 #include "data/data_peer_id.h"
 
@@ -97,61 +96,6 @@ void Database::markDeleted(int64_t peerId, int64_t msgId) {
     }
 }
 
-void Database::markDeletedBatch(int64_t peerId, const std::vector<int64_t> &msgIds) {
-    if (!_initialized || msgIds.empty()) return;
-    try {
-        _storage->transaction([&] {
-            using namespace sqlite_orm;
-            for (const auto id : msgIds) {
-                _storage->update_all(
-                    set(c(&SavedMessage::is_deleted) = 1),
-                    where(
-                        c(&SavedMessage::peer_id) == peerId
-                        and c(&SavedMessage::msg_id) == id
-                    )
-                );
-            }
-            return true;
-        });
-    } catch (const std::exception &e) {
-        LOG(("AhiGram DB error (markDeletedBatch): %1").arg(e.what()));
-    }
-}
-
-std::optional<SavedMessage> Database::getMessage(int64_t peerId, int64_t msgId) const {
-    if (!_initialized) return std::nullopt;
-    try {
-        using namespace sqlite_orm;
-        auto results = _storage->get_all<SavedMessage>(
-            where(
-                c(&SavedMessage::peer_id) == peerId
-                and c(&SavedMessage::msg_id) == msgId
-            )
-        );
-        if (!results.empty()) return results.front();
-    } catch (const std::exception &e) {
-        LOG(("AhiGram DB error (getMessage): %1").arg(e.what()));
-    }
-    return std::nullopt;
-}
-
-std::vector<SavedMessage> Database::getDeletedMessages(int64_t peerId) const {
-    if (!_initialized) return {};
-    try {
-        using namespace sqlite_orm;
-        return _storage->get_all<SavedMessage>(
-            where(
-                c(&SavedMessage::peer_id) == peerId
-                and c(&SavedMessage::is_deleted) == 1
-            ),
-            order_by(&SavedMessage::date).asc()
-        );
-    } catch (const std::exception &e) {
-        LOG(("AhiGram DB error (getDeletedMessages): %1").arg(e.what()));
-    }
-    return {};
-}
-
 std::vector<SavedMessage> Database::getAllDeletedUserMessages() const {
     if (!_initialized) return {};
     try {
@@ -189,24 +133,5 @@ bool Database::hasMessage(int64_t peerId, int64_t msgId) const {
     }
     return false;
 }
-
-void Database::markDeletedNonChannel(const std::vector<int64_t> &msgIds) {
-    if (!_initialized || msgIds.empty()) return;
-    try {
-        _storage->transaction([&] {
-            using namespace sqlite_orm;
-            for (const auto id : msgIds) {
-                _storage->update_all(
-                    set(c(&SavedMessage::is_deleted) = 1),
-                    where(c(&SavedMessage::msg_id) == id)
-                );
-            }
-            return true;
-        });
-    } catch (const std::exception &e) {
-        LOG(("AhiGram DB error (markDeletedNonChannel): %1").arg(e.what()));
-    }
-}
-
 
 } // namespace AhiGram::DelMessage

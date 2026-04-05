@@ -10,7 +10,6 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 
 #include <string>
 #include <vector>
-#include <optional>
 #include <cstdint>
 #include <memory>
 #include <utility>
@@ -82,14 +81,10 @@ public:
 
     void upsertMessage(const SavedMessage &msg);
     void markDeleted(int64_t peerId, int64_t msgId);
-    void markDeletedBatch(int64_t peerId, const std::vector<int64_t> &msgIds);
-    void markDeletedNonChannel(const std::vector<int64_t> &msgIds);
 
     [[nodiscard]] std::pair<int64_t, int64_t> cleanupInfo();
     void clearDeletedMessages();
 
-    [[nodiscard]] std::optional<SavedMessage> getMessage(int64_t peerId, int64_t msgId) const;
-    [[nodiscard]] std::vector<SavedMessage> getDeletedMessages(int64_t peerId) const;
     [[nodiscard]] std::vector<SavedMessage> getAllDeletedUserMessages() const;
     [[nodiscard]] bool hasMessage(int64_t peerId, int64_t msgId) const;
 

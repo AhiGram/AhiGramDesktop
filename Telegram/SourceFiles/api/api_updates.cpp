@@ -70,9 +70,6 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "apiwrap.h"
 #include "ui/text/format_values.h" // Ui::FormatPhone
 
-// AhiGram Include
-#include "ahigram/features/del_message/ahi_del_message_hook.h"
-
 namespace Api {
 namespace {
 
@@ -1198,7 +1195,7 @@ void Updates::applyUpdatesNoPtsCheck(const MTPUpdates &updates) {
 		const auto &d = updates.c_updateShortMessage();
 		const auto flags = mtpCastFlags(d.vflags().v)
 			| MTPDmessage::Flag::f_from_id;
-		const auto mtpMsg = MTP_message( // AhiGram
+		const auto mtpMsg = MTP_message(
 				MTP_flags(flags),
 				d.vid(),
 				(d.is_out()
@@ -1244,7 +1241,7 @@ void Updates::applyUpdatesNoPtsCheck(const MTPUpdates &updates) {
 		const auto &d = updates.c_updateShortChatMessage();
 		const auto flags = mtpCastFlags(d.vflags().v)
 			| MTPDmessage::Flag::f_from_id;
-		const auto mtpMsg = MTP_message( // AhiGram
+		const auto mtpMsg = MTP_message(
 				MTP_flags(flags),
 				d.vid(),
 				MTP_peerUser(d.vfrom_id()),

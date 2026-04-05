@@ -2957,6 +2957,7 @@ void Session::processNonChannelMessagesDeleted(const QVector<MTPint> &data) {
 		if (const auto item = nonChannelMessage(messageId.v)) {
 			const auto history = item->history();
 			const auto peerId = item->history()->peer->id;
+			// AhiGram
 			if (AhiGram::DelMessage::shouldSaveDeletedMessages()) {
 				if (!AhiGram::DelMessage::Database::Instance().hasMessage(
 						peerId.value,
