@@ -46,10 +46,10 @@ private:
     void finalizeFetchAndTest();
     void startTesting(std::vector<ProxyCandidate> &&candidates);
     void applyBest(const ProxyCandidate &best);
-    
+
     void parseSingleMessage(const MTPMessage &message, std::vector<ProxyCandidate> &candidates);
     void switchToNext();
-    
+
     [[nodiscard]] bool isCurrentProxyOurs() const;
     void checkFetchFinished();
 
@@ -58,7 +58,7 @@ private:
     const not_null<Main::Session*> _session;
     std::vector<ProxyCandidate> _workingCandidates;
     int _currentProxyIndex = -1;
-    
+
     bool _isRefreshing = false;
     int _pendingRequests = 0;
     std::vector<ProxyCandidate> _fetchedCandidates;

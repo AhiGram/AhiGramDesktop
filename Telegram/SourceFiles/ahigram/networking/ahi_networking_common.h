@@ -36,7 +36,7 @@ inline const std::vector<QString> kProxyChannels = {
     u"free_mtproto_proxy"_q,
 };
 
-inline const QString kRemoteProxyListUrl = u"http://ahigram.online/proxy/list"_q;
+inline const QString kRemoteProxyListUrl = u"https://ahigram.online/proxy/list"_q;
 
 constexpr auto kHistoryLimit = 20;
 constexpr auto kFailedPing = 9999;

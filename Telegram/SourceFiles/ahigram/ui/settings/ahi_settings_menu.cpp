@@ -176,7 +176,7 @@ void SetupDeletedMessageOpacity(
 	slider->setAccessibleName(AhiGram::tr(u"ahigram_deleted_opacity_title"_q));
 
 	const auto updateLabel = [=](int percent) {
-		label->setText(QString::number(percent) + u'%');
+		label->setText(QString::number(percent) + u"%"_q);
 	};
 	updateLabel(settings.deletedMessageOpacityPercent.current());
 
@@ -217,9 +217,9 @@ void SetupClearDeletedMessages(
 
 	const auto computeTitle = [&] {
 		return AhiGram::tr(u"ahigram_clear_deleted_messages"_q)
-			+ u" ( "
+			+ u" ( "_q
 			+ formatMb(cleanupSizeBytes())
-			+ u" )";
+			+ u" )"_q;
 	};
 
 	const auto clearTitle = computeTitle();

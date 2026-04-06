@@ -30,9 +30,9 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 namespace AhiGram::Networking {
 
 ProxyAutobot::ProxyAutobot(not_null<Main::Session*> session)
-    : _session(session)
-    , _remoteLoader(std::make_unique<AhiGram::Api::RemoteProxyListLoader>()) {
-    
+    : _remoteLoader(std::make_unique<AhiGram::Api::RemoteProxyListLoader>())
+    , _session(session) {
+
     _session->account().mtp().restartsByTimeout()
     | rpl::on_next([=] {
         if (AhiGram::Storage::Settings::Instance().data().ahiBypass.current()) {
@@ -40,7 +40,7 @@ ProxyAutobot::ProxyAutobot(not_null<Main::Session*> session)
             switchToNext();
         }
     }, _lifetime);
-    
+
     AhiGram::Storage::Settings::Instance().data().ahiBypass.changes()
     | rpl::on_next([=](bool enabled) {
         if (enabled) {
@@ -65,7 +65,7 @@ ProxyAutobot::ProxyAutobot(not_null<Main::Session*> session)
             switchToNext();
         }
     });
-    
+
     _failoverTimer->callEach(Constants::kFailoverCheckIntervalMs);
 }
 
@@ -218,7 +218,7 @@ void ProxyAutobot::parseSingleMessage(const MTPMessage &message, std::vector<Pro
 
 void ProxyAutobot::startTesting(std::vector<ProxyCandidate> &&candidates) {
     AHI_LOG(("AhiGram: Starting parallel testing for %1 unique proxies...").arg(candidates.size()));
-    
+
     struct LocalResults {
         std::vector<ProxyCandidate> list;
         bool appliedFirst = false;
@@ -229,10 +229,10 @@ void ProxyAutobot::startTesting(std::vector<ProxyCandidate> &&candidates) {
     | rpl::on_next_done([=](const ProxyCandidate &res) {
         if (res.ping >= 0 && res.ping < Constants::kFailedPing) {
             local->list.push_back(res);
-            
+
             const auto state = _session->account().mtp().dcstate(0);
             const bool currentBroken = (state != MTP::ConnectedState);
-            
+
             if ((!local->appliedFirst || currentBroken) && res.ping < 1000) {
                 AHI_LOG(("AhiGram: Fast apply proxy: %1 (ping: %2)").arg(res.host).arg(res.ping));
                 local->appliedFirst = true;
@@ -242,7 +242,7 @@ void ProxyAutobot::startTesting(std::vector<ProxyCandidate> &&candidates) {
     }, [=] {
         _isRefreshing = false;
         AHI_LOG(("AhiGram: Unified testing finished. Found %1 working proxies.").arg(local->list.size()));
-        
+
         if (!local->list.empty()) {
             std::sort(local->list.begin(), local->list.end(), [=](const ProxyCandidate &a, const ProxyCandidate &b) {
                 auto weightA = static_cast<double>(a.ping);
@@ -254,10 +254,10 @@ void ProxyAutobot::startTesting(std::vector<ProxyCandidate> &&candidates) {
 
             _workingCandidates = std::move(local->list);
             _currentProxyIndex = 0;
-            
+
             const auto &best = _workingCandidates[0];
             const auto &current = Core::App().settings().proxy().selected();
-            
+
             if (current.host != best.host || current.port != best.port) {
                 applyBest(best);
             }
@@ -268,7 +268,7 @@ void ProxyAutobot::startTesting(std::vector<ProxyCandidate> &&candidates) {
 void ProxyAutobot::applyBest(const ProxyCandidate &best) {
     auto &proxySettings = Core::App().settings().proxy();
     const auto &current = proxySettings.selected();
-    
+
     if (proxySettings.isEnabled() && current.host == best.host && current.port == best.port) {
         return;
     }
@@ -281,7 +281,7 @@ void ProxyAutobot::applyBest(const ProxyCandidate &best) {
     if (!proxy.valid()) return;
 
     _lastApplyTime = crl::now();
-    
+
     auto &list = proxySettings.list();
     auto it = std::find_if(list.begin(), list.end(), [&](const MTP::ProxyData &p) {
         return p.host == proxy.host && p.port == proxy.port;
