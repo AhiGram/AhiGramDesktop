@@ -18,9 +18,9 @@ namespace AhiGram {
 class SettingsData {
 public:
     rpl::variable<bool> ahiBypass = { true };
-    rpl::variable<bool> disableTelegramAds = { false };
-    rpl::variable<bool> saveDelMessage = { true };
-    rpl::variable<bool> loadDelMessage = { true };
+    rpl::variable<bool> disableTelegramAds = { true };
+    rpl::variable<bool> saveDelMessage = { false };
+    rpl::variable<bool> loadDelMessage = { false };
     rpl::variable<bool> deletedMessageOpacityEnabled = { true };
     rpl::variable<int> deletedMessageOpacityPercent = { 50 };
 
