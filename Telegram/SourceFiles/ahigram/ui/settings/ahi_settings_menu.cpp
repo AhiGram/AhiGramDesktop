@@ -22,9 +22,11 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include "settings/settings_common.h"
 #include "ui/boxes/confirm_box.h"
 #include "ui/qt_object_factory.h"
+#include "ui/widgets/buttons.h"
 #include "ui/wrap/vertical_layout.h"
 #include "ui/vertical_list.h"
 #include "window/window_session_controller.h"
+#include "window/notifications_manager.h"
 
 #include "styles/style_ahi_settings.h"
 #include "styles/style_menu_icons.h"
@@ -244,6 +246,26 @@ void SetupClearDeletedMessages(
 	});
 }
 
+void SetupOther(
+		not_null<Ui::VerticalLayout*> container,
+		AhiGram::SettingsData &settings) {
+	Ui::AddSkip(container);
+	Ui::AddSubsectionTitle(container, AhiGram::trReactive(u"ahigram_other_section"_q));
+
+	const auto button = container->add(
+		object_ptr<Ui::SettingsButton>(
+			container,
+			AhiGram::trReactive(u"ahigram_disable_colored_buttons"_q),
+			st::ahiSettingsButtonNoIcon));
+	
+	button->toggleOn(settings.disableColoredButtons.value());
+
+	button->toggledChanges() | rpl::on_next([&settings](bool toggled) {
+		settings.disableColoredButtons.force_assign(toggled);
+		Core::App().notifications().updateAll();
+	}, container->lifetime());
+}
+
 } // namespace
 
 AhiMainSettings::AhiMainSettings(
@@ -267,6 +289,7 @@ void AhiMainSettings::setupContent() {
 	SetupDelMessageOptions(not_null(content), _controller, settings);
 	SetupDeletedMessageOpacity(not_null(content), settings);
 	SetupClearDeletedMessages(not_null(content), _controller);
+	SetupOther(not_null(content), settings);
 
 	Ui::ResizeFitChild(this, content);
 }

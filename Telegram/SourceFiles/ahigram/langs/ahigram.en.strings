@@ -13,3 +13,5 @@
 "ahigram_deleted_opacity_title" = "Deleted dim level";
 "ahigram_clear_deleted_messages" = "Clear deleted messages";
 "ahigram_clear_deleted_messages_confirm" = "Clear the deleted messages database completely?";
+"ahigram_other_section" = "Other";
+"ahigram_disable_colored_buttons" = "Disable colored buttons";

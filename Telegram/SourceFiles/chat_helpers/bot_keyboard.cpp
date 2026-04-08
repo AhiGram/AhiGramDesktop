@@ -23,6 +23,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_chat.h"
 #include "styles/style_widgets.h"
 
+// AhiGram
+#include "ahigram/core/ahi_storage.h"
+
 namespace {
 
 const auto kBotKeyboardRounding = Ui::BubbleRounding{
@@ -87,6 +90,10 @@ void Style::paintButtonStart(
 		QPainter &p,
 		const Ui::ChatStyle *st,
 		HistoryMessageMarkupButton::Color color) const {
+	// AhiGram
+	if (AhiGram::Storage::Settings::Instance().data().disableColoredButtons.current()) {
+		color = HistoryMessageMarkupButton::Color::Normal;
+	}
 	using Color = HistoryMessageMarkupButton::Color;
 	p.setPen((color == Color::Normal) ? st::botKbColor : st::white);
 	p.setFont(st::botKbStyle.font);
@@ -133,6 +140,10 @@ void Style::paintButtonBg(
 		HistoryMessageMarkupButton::Color color,
 		Ui::BubbleRounding rounding,
 		float64 howMuchOver) const {
+	// AhiGram
+    if (AhiGram::Storage::Settings::Instance().data().disableColoredButtons.current()) {
+        color = HistoryMessageMarkupButton::Color::Normal;
+    }
 	using Color = HistoryMessageMarkupButton::Color;
 	using Corner = Ui::BubbleCornerRounding;
 	const auto bg = (color == Color::Normal)
