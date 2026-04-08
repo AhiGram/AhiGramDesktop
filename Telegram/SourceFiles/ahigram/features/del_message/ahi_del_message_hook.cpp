@@ -192,7 +192,7 @@ void saveSnapshotFromItem(not_null<HistoryItem*> item) {
 	if (!shouldSaveDeletedMessages()) {
 		return;
 	}
-	if (!item->isRegular()) {
+	if (!item->isRegular() || item->out()) {
 		return;
 	}
 	const auto peerId = item->history()->peer->id;
@@ -205,6 +205,7 @@ void saveSnapshotFromItem(not_null<HistoryItem*> item) {
 	}
 	const auto &d = mtp.c_message();
 	auto saved = parseMessage(d);
+	saved.owner_id = item->history()->session().userPeerId().value;
 	saved.raw_mtp = serializeMessage(mtp);
 	saved.is_deleted = 1;
 	Database::Instance().upsertMessage(saved);
@@ -271,7 +272,8 @@ void restoreDeletedPrivateMessages(not_null<Data::Session*> session) {
 	if (!shouldLoadDeletedMessages()) {
 		return;
 	}
-	auto all = Database::Instance().getAllDeletedUserMessages();
+	const auto ownerId = session->session().userPeerId().value;
+	auto all = Database::Instance().getAllDeletedUserMessages(ownerId);
 	if (all.empty()) {
 		return;
 	}
@@ -295,8 +297,9 @@ void restoreDeletedPrivateMessagesForPeer(
 	if (!peerIsUser(peerId)) {
 		return;
 	}
+	const auto ownerId = session->session().userPeerId().value;
 	const auto peerKey = static_cast<int64_t>(peerId.value);
-	auto rows = Database::Instance().getDeletedUserMessagesForPeer(peerKey);
+	auto rows = Database::Instance().getDeletedUserMessagesForPeer(ownerId, peerKey);
 	if (rows.empty()) {
 		return;
 	}

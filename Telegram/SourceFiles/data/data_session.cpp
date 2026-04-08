@@ -2920,16 +2920,28 @@ void Session::processMessagesDeleted(
 			const auto history = i->second->history();
 			if (AhiGram::DelMessage::shouldSaveDeletedMessages()) {
 				AhiGram::DelMessage::Database::Instance().init();
+				const auto ownerId = session().userPeerId().value;
+				if (i->second->out()) {
+					AhiGram::DelMessage::Database::Instance().deleteMessage(
+						ownerId,
+						peerId.value,
+						messageId.v);
+					i->second->destroy();
+					continue;
+				}
 				if (!AhiGram::DelMessage::Database::Instance().hasMessage(
+						ownerId,
 						peerId.value,
 						messageId.v)) {
 					AhiGram::DelMessage::saveSnapshotFromItem(i->second);
 				} else {
 					AhiGram::DelMessage::Database::Instance().markDeleted(
+						ownerId,
 						peerId.value,
 						messageId.v);
 				}
 				if (AhiGram::DelMessage::Database::Instance().hasMessage(
+						ownerId,
 						peerId.value,
 						messageId.v)) {
 					i->second->setAhiDeleted();
@@ -2958,18 +2970,31 @@ void Session::processNonChannelMessagesDeleted(const QVector<MTPint> &data) {
 		if (const auto item = nonChannelMessage(messageId.v)) {
 			const auto history = item->history();
 			const auto peerId = item->history()->peer->id;
+			// AhiGram
 			if (AhiGram::DelMessage::shouldSaveDeletedMessages()) {
 				AhiGram::DelMessage::Database::Instance().init();
+				const auto ownerId = session().userPeerId().value;
+				if (item->out()) {
+					AhiGram::DelMessage::Database::Instance().deleteMessage(
+						ownerId,
+						peerId.value,
+						messageId.v);
+					item->destroy();
+					continue;
+				}
 				if (!AhiGram::DelMessage::Database::Instance().hasMessage(
+						ownerId,
 						peerId.value,
 						messageId.v)) {
 					AhiGram::DelMessage::saveSnapshotFromItem(item);
 				} else {
 					AhiGram::DelMessage::Database::Instance().markDeleted(
+						ownerId,
 						peerId.value,
 						messageId.v);
 				}
 				if (AhiGram::DelMessage::Database::Instance().hasMessage(
+						ownerId,
 						peerId.value,
 						messageId.v)) {
 					item->setAhiDeleted();

@@ -14,6 +14,7 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include <cstdint>
 #include <exception>
 #include <memory>
+#include "core/launcher.h"
 
 #include "data/data_peer_id.h"
 
@@ -26,26 +27,40 @@ Database &Database::Instance() {
     return instance;
 }
 
+namespace {
+const int kCurrentDbVersion = 2;
+} // namespace
+
 void Database::init() {
-    if (_initialized) {
-        return;
-    }
+	if (_initialized) {
+		return;
+	}
 
-    const auto basePath = cWorkingDir() + u"tdata/"_q;
-    if (!QDir().exists(basePath)) {
-        QDir().mkpath(basePath);
-    }
+	const auto tdata = cWorkingDir() + "tdata/";
+	if (!QDir(tdata).exists()) {
+		QDir().mkpath(tdata);
+	}
 
-    _dbPath = basePath + u"ahigram_messages.sqlite"_q;
-    const auto dbPath = _dbPath.toStdString();
+	const auto dbPath = (tdata + "ahigram_messages.sqlite").toStdString();
+	_storage = std::make_unique<Storage>(detail::makeSavedMessagesStorage(dbPath));
 
-    _storage = std::make_unique<decltype(detail::makeSavedMessagesStorage(""))>(
-        detail::makeSavedMessagesStorage(dbPath)
-    );
-    _storage->sync_schema();
-    _initialized = true;
+	static constexpr int kCurrentDbVersion = 2;
+	try {
+		const auto version = _storage->pragma.user_version();
+		if (version < kCurrentDbVersion) {
+			_storage->drop_table_if_exists("saved_messages");
+			_storage->pragma.user_version(kCurrentDbVersion);
+		}
+	} catch (const std::exception &e) {
+		LOG(("AhiGram DB Error: pre-init failed: %1").arg(e.what()));
+	}
 
-    LOG(("AhiGram DB: initialized at %1").arg(QString::fromStdString(dbPath)));
+	_storage->sync_schema();
+	_initialized = true;
+
+	LOG(("AhiGram DB: initialized at %1 (v%2)").arg(
+		QString::fromStdString(dbPath),
+		QString::number(kCurrentDbVersion)));
 }
 
 void Database::upsertMessage(const SavedMessage &msg) {
@@ -84,14 +99,31 @@ void Database::clearDeletedMessages() {
     }
 }
 
-void Database::markDeleted(int64_t peerId, int64_t msgId) { 
+void Database::deleteMessage(int64_t ownerId, int64_t peerId, int64_t msgId) { 
+    if (!_initialized) return;
+    try {
+        using namespace sqlite_orm;
+        _storage->remove_all<SavedMessage>(
+            where(
+                c(&SavedMessage::owner_id) == ownerId 
+                and c(&SavedMessage::peer_id) == peerId
+                and c(&SavedMessage::msg_id) == msgId
+            )
+        );
+    } catch (const std::exception &e) {
+        LOG(("AhiGram Error: Database::deleteMessage fail: %1").arg(e.what()));
+    }
+}
+
+void Database::markDeleted(int64_t ownerId, int64_t peerId, int64_t msgId) { 
     if (!_initialized) return;
     try {
         using namespace sqlite_orm;
         _storage->update_all(
             set(c(&SavedMessage::is_deleted) = 1),
             where(
-                c(&SavedMessage::peer_id) == peerId
+                c(&SavedMessage::owner_id) == ownerId
+                and c(&SavedMessage::peer_id) == peerId
                 and c(&SavedMessage::msg_id) == msgId
             )
         );
@@ -100,12 +132,16 @@ void Database::markDeleted(int64_t peerId, int64_t msgId) {
     }
 }
 
-std::vector<SavedMessage> Database::getAllDeletedUserMessages() const {
+std::vector<SavedMessage> Database::getAllDeletedUserMessages(
+        int64_t ownerId) const {
     if (!_initialized) return {};
     try {
         using namespace sqlite_orm;
         auto results = _storage->get_all<SavedMessage>(
-            where(c(&SavedMessage::is_deleted) == 1),
+            where(
+                c(&SavedMessage::owner_id) == ownerId
+                and c(&SavedMessage::is_deleted) == 1
+            ),
             order_by(&SavedMessage::date).asc()
         );
         std::vector<SavedMessage> userMessages;
@@ -123,6 +159,7 @@ std::vector<SavedMessage> Database::getAllDeletedUserMessages() const {
 }
 
 std::vector<SavedMessage> Database::getDeletedUserMessagesForPeer(
+        int64_t ownerId,
         int64_t peerId) const {
     if (!_initialized) {
         return {};
@@ -131,7 +168,8 @@ std::vector<SavedMessage> Database::getDeletedUserMessagesForPeer(
         using namespace sqlite_orm;
         return _storage->get_all<SavedMessage>(
             where(
-                c(&SavedMessage::peer_id) == peerId
+                c(&SavedMessage::owner_id) == ownerId
+                and c(&SavedMessage::peer_id) == peerId
                 and c(&SavedMessage::is_deleted) == 1
             ),
             order_by(&SavedMessage::date).asc()
@@ -142,13 +180,14 @@ std::vector<SavedMessage> Database::getDeletedUserMessagesForPeer(
     return {};
 }
 
-bool Database::hasMessage(int64_t peerId, int64_t msgId) const {
+bool Database::hasMessage(int64_t ownerId, int64_t peerId, int64_t msgId) const {
     if (!_initialized) return false;
     try {
         using namespace sqlite_orm;
         return _storage->count<SavedMessage>(
             where(
-                c(&SavedMessage::peer_id) == peerId
+                c(&SavedMessage::owner_id) == ownerId
+                and c(&SavedMessage::peer_id) == peerId
                 and c(&SavedMessage::msg_id) == msgId
             )
         ) > 0;

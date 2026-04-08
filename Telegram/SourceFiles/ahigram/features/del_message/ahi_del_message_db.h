@@ -20,6 +20,7 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 namespace AhiGram::DelMessage {
 
 struct SavedMessage {
+    int64_t     owner_id        = 0;
     int64_t     peer_id         = 0;
     int64_t     msg_id          = 0;
     int64_t     from_id         = 0;
@@ -46,6 +47,7 @@ inline auto makeSavedMessagesStorage(const std::string &path) {
     return make_storage(
         path,
         make_table("saved_messages",
+            make_column("owner_id",      &SavedMessage::owner_id),
             make_column("peer_id",       &SavedMessage::peer_id),
             make_column("msg_id",        &SavedMessage::msg_id),
             make_column("from_id",       &SavedMessage::from_id),
@@ -63,12 +65,14 @@ inline auto makeSavedMessagesStorage(const std::string &path) {
             make_column("is_noforwards", &SavedMessage::is_noforwards),
             make_column("is_deleted",    &SavedMessage::is_deleted),
             make_column("raw_mtp",       &SavedMessage::raw_mtp),
-            primary_key(&SavedMessage::peer_id, &SavedMessage::msg_id)
+            primary_key(&SavedMessage::owner_id, &SavedMessage::peer_id, &SavedMessage::msg_id)
         )
     );
 }
 
 } // namespace detail
+
+using Storage = decltype(detail::makeSavedMessagesStorage(""));
 
 class Database {
 public:
@@ -80,21 +84,27 @@ public:
     void init();
 
     void upsertMessage(const SavedMessage &msg);
-    void markDeleted(int64_t peerId, int64_t msgId);
+    void markDeleted(int64_t ownerId, int64_t peerId, int64_t msgId);
+    void deleteMessage(int64_t ownerId, int64_t peerId, int64_t msgId);
 
     [[nodiscard]] std::pair<int64_t, int64_t> cleanupInfo();
     void clearDeletedMessages();
 
-    [[nodiscard]] std::vector<SavedMessage> getAllDeletedUserMessages() const;
+    [[nodiscard]] std::vector<SavedMessage> getAllDeletedUserMessages(
+        int64_t ownerId) const;
     [[nodiscard]] std::vector<SavedMessage> getDeletedUserMessagesForPeer(
+        int64_t ownerId,
         int64_t peerId) const;
-    [[nodiscard]] bool hasMessage(int64_t peerId, int64_t msgId) const;
+    [[nodiscard]] bool hasMessage(
+        int64_t ownerId,
+        int64_t peerId,
+        int64_t msgId) const;
 
 private:
     Database() = default;
     ~Database() = default;
 
-    std::unique_ptr<decltype(detail::makeSavedMessagesStorage(""))> _storage;
+    std::unique_ptr<Storage> _storage;
     bool _initialized = false;
     QString _dbPath;
 };
