@@ -2921,14 +2921,17 @@ void Session::processMessagesDeleted(
 			if (AhiGram::DelMessage::shouldSaveDeletedMessages()) {
 				AhiGram::DelMessage::Database::Instance().init();
 				const auto ownerId = session().userPeerId().value;
-				if (i->second->out()) {
-					AhiGram::DelMessage::Database::Instance().deleteMessage(
-						ownerId,
-						peerId.value,
-						messageId.v);
+				const auto peer = i->second->history()->peer;
+				if (peer->isBot() || i->second->out()) {
 					i->second->destroy();
 					continue;
 				}
+				if (peer->isChannel() || peer->isChat()) {
+					i->second->setAhiDeleted();
+					i->second->history()->owner().requestItemRepaint(i->second);
+					continue;
+				}
+
 				if (!AhiGram::DelMessage::Database::Instance().hasMessage(
 						ownerId,
 						peerId.value,
@@ -2974,14 +2977,17 @@ void Session::processNonChannelMessagesDeleted(const QVector<MTPint> &data) {
 			if (AhiGram::DelMessage::shouldSaveDeletedMessages()) {
 				AhiGram::DelMessage::Database::Instance().init();
 				const auto ownerId = session().userPeerId().value;
-				if (item->out()) {
-					AhiGram::DelMessage::Database::Instance().deleteMessage(
-						ownerId,
-						peerId.value,
-						messageId.v);
+				const auto peer = item->history()->peer;
+				if (peer->isBot() || item->out()) {
 					item->destroy();
 					continue;
 				}
+				if (peer->isChannel() || peer->isChat()) {
+					item->setAhiDeleted();
+					item->history()->owner().requestItemRepaint(item);
+					continue;
+				}
+
 				if (!AhiGram::DelMessage::Database::Instance().hasMessage(
 						ownerId,
 						peerId.value,
@@ -3005,6 +3011,7 @@ void Session::processNonChannelMessagesDeleted(const QVector<MTPint> &data) {
 			} else {
 				item->destroy();
 			}
+
 			if (!history->chatListMessageKnown()) {
 				historiesToCheck.emplace(history);
 			}
@@ -3186,6 +3193,7 @@ HistoryItem *Session::addNewMessage(
 	if (!peerId || data.type() == mtpc_messageEmpty) {
 		return nullptr;
 	}
+	const auto p = peer(peerId);
 
 	const auto result = history(peerId)->addNewMessage(
 		id,

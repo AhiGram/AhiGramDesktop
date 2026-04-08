@@ -13,6 +13,8 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include "api/api_text_entities.h"
 #include "data/data_peer_id.h"
 #include "data/data_session.h"
+#include "data/data_user.h"
+
 #include "history/history.h"
 #include "history/history_item.h"
 #include "main/main_session.h"
@@ -196,7 +198,7 @@ void saveSnapshotFromItem(not_null<HistoryItem*> item) {
 		return;
 	}
 	const auto peerId = item->history()->peer->id;
-	if (!peerIsUser(peerId)) {
+	if (!peerIsUser(peerId) || item->history()->peer->isBot()) {
 		return;
 	}
 	const auto mtp = BuildMtpMessageFromItem(item);
