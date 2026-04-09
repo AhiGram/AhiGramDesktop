@@ -7,6 +7,7 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 */
 
 #include "ahi_storage.h"
+#include "ahigram/utils/ahi_region_utils.h"
 
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
@@ -16,6 +17,10 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include <algorithm>
 
 namespace AhiGram {
+
+SettingsData::SettingsData()
+: ahiBypass(Utils::IsRestrictedRegion()) {
+}
 
 QVariantMap SettingsData::toMap() const {
     return {
@@ -30,7 +35,7 @@ QVariantMap SettingsData::toMap() const {
 }
 
 void SettingsData::fillFromMap(const QVariantMap &map) {
-    ahiBypass.force_assign(map.value(u"ahiBypass"_q, ahiBypass.current()).toBool());
+    ahiBypass.force_assign(map.value(u"ahiBypass"_q, Utils::IsRestrictedRegion()).toBool());
     disableTelegramAds.force_assign(map.value(
         u"disableTelegramAds"_q,
         disableTelegramAds.current()).toBool());

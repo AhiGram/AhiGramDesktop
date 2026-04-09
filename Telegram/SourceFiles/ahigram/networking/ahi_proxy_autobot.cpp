@@ -9,7 +9,7 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include "ahi_proxy_autobot.h"
 #include "ahi_proxy_parser.h"
 #include "ahi_proxy_tester.h"
-
+#include "ahigram/networking/ahi_proxy_utils.h"
 #include "ahigram/core/ahi_storage.h"
 
 #include "base/timer.h"
@@ -266,46 +266,8 @@ void ProxyAutobot::startTesting(std::vector<ProxyCandidate> &&candidates) {
 }
 
 void ProxyAutobot::applyBest(const ProxyCandidate &best) {
-    auto &proxySettings = Core::App().settings().proxy();
-    const auto &current = proxySettings.selected();
-
-    if (proxySettings.isEnabled() && current.host == best.host && current.port == best.port) {
-        return;
-    }
-
-    MTP::ProxyData proxy;
-    proxy.host = best.host;
-    proxy.port = best.port;
-    proxy.password = best.secret;
-    proxy.type = MTP::ProxyData::Type::Mtproto;
-    if (!proxy.valid()) return;
-
     _lastApplyTime = crl::now();
-
-    auto &list = proxySettings.list();
-    auto it = std::find_if(list.begin(), list.end(), [&](const MTP::ProxyData &p) {
-        return p.host == proxy.host && p.port == proxy.port;
-    });
-
-    if (it == list.end()) {
-        if (list.size() >= Constants::kMaxProxyCount) {
-            int removed = 0;
-            list.erase(std::remove_if(list.begin(), list.end(), [&](const MTP::ProxyData &p) {
-                if (removed >= Constants::kProxyCleanupBatch) return false;
-                if (p.host == current.host && p.port == current.port) return false;
-                removed++;
-                return true;
-            }), list.end());
-        }
-        list.push_back(proxy);
-    }
-
-    proxySettings.setSelected(proxy);
-    proxySettings.setSettings(MTP::ProxyData::Settings::Enabled);
-    proxySettings.connectionTypeChangesNotify();
-
-    Core::App().saveSettingsDelayed();
-    _session->account().mtp().restart();
+    ApplyProxyCandidate(best, _session);
 }
 
 void ProxyAutobot::switchToNext() {

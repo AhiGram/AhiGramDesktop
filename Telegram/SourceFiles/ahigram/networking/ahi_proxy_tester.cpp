@@ -7,6 +7,7 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 */
 
 #include "ahi_proxy_tester.h"
+
 #include "mtproto/connection_abstract.h"
 #include "mtproto/mtp_instance.h"
 
@@ -78,6 +79,18 @@ struct ProxyTester::Instance final : public std::enable_shared_from_this<ProxyTe
         proxy.type = MTP::ProxyData::Type::Mtproto;
 
         const auto secret = proxy.secretFromMtprotoPassword();
+        if (!secret.empty() 
+            && secret.size() != 16 
+            && !(secret.size() == 17 && secret[0] == bytes::type(0xDD))
+            && !(secret.size() >= 21 && secret[0] == bytes::type(0xEE))) {
+            AHI_LOG(("AhiGram: Proxy %1 has invalid secret format, skipping").arg(test->index + 1));
+            auto &candidate = queue[test->index];
+            candidate.ping = Constants::kFailedPing;
+            results.fire_copy(candidate);
+            finishOne();
+            return;
+        }
+
         const auto protocol = MTP::DcOptions::Variants::Tcp;
         const auto dcId = mtp->mainDcId();
 

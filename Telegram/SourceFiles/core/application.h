@@ -109,6 +109,11 @@ namespace Webrtc {
 class Environment;
 } // namespace Webrtc
 
+// AhiGram
+namespace AhiGram::Networking {
+class RegionProxyInitializer;
+} // namespace AhiGram::Networking
+
 namespace Core {
 
 struct LocalUrlHandler;
@@ -471,6 +476,7 @@ private:
 
 	rpl::event_stream<> _materializeLocalDraftsRequests;
 
+	std::unique_ptr<AhiGram::Networking::RegionProxyInitializer> _ahiProxyInitializer; // AhiGram
 	rpl::lifetime _lifetime;
 
 	crl::time _lastNonIdleTime = 0;

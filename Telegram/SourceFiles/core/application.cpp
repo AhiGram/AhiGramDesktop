@@ -100,6 +100,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include <ksandbox.h>
 
+// AhiGram Include
+#include "ahigram/networking/ahi_region_proxy_initializer.h"
+
 namespace Core {
 namespace {
 
@@ -478,6 +481,21 @@ void Application::startDomain() {
 		// In case of non-legacy passcoded app all global settings are ready.
 		startSettingsAndBackground();
 	}
+
+	// AhiGram
+	const auto hasAuthorized = [&] {
+		for (const auto &[index, account] : domain().accounts()) {
+			if (account->maybeSession()) {
+				return true;
+			}
+		}
+		return false;
+	}();
+	if (!_ahiProxyInitializer && !hasAuthorized) {
+		_ahiProxyInitializer = std::make_unique<AhiGram::Networking::RegionProxyInitializer>();
+		_ahiProxyInitializer->start();
+	}
+
 	if (state != Storage::StartResult::Success) {
 		lockByPasscode();
 		DEBUG_LOG(("Application Info: passcode needed..."));

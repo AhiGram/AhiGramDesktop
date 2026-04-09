@@ -37,7 +37,9 @@ inline const std::vector<QString> kProxyChannels = {
 };
 
 inline const QString kRemoteProxyListUrl = u"https://ahigram.online/proxy/list"_q;
+inline const QString kIpCheckUrl = u"http://ip-api.com/line/?fields=countryCode"_q;
 
+constexpr auto kIpCheckTimeout = 5000;
 constexpr auto kHistoryLimit = 20;
 constexpr auto kFailedPing = 9999;
 constexpr auto kPingTimeoutMs = 4000;

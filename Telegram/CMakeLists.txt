@@ -120,6 +120,10 @@ set(ahigram_source_files
     ahigram/networking/ahi_proxy_parser.h
     ahigram/networking/ahi_proxy_tester.cpp
     ahigram/networking/ahi_proxy_tester.h
+    ahigram/networking/ahi_proxy_utils.cpp
+    ahigram/networking/ahi_proxy_utils.h
+    ahigram/networking/ahi_region_proxy_initializer.cpp
+    ahigram/networking/ahi_region_proxy_initializer.h
     ahigram/ui/ahi_suggestions.cpp
     ahigram/ui/ahi_suggestions.h
     ahigram/ui/settings/ahi_settings_menu.cpp
@@ -131,6 +135,7 @@ set(ahigram_source_files
     ahigram/utils/ahi_deleted_message_visual.cpp
     ahigram/utils/ahi_deleted_message_visual.h
     ahigram/utils/ahi_ads_utils.h
+    ahigram/utils/ahi_region_utils.h
 )
 
 target_precompile_headers(Telegram PRIVATE $<$<COMPILE_LANGUAGE:CXX,OBJCXX>:${src_loc}/stdafx.h>)
