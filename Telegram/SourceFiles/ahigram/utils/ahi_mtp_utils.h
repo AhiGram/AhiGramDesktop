@@ -16,4 +16,9 @@ namespace AhiGram::Utils {
 [[nodiscard]] std::vector<char> SerializeMtpMessage(const MTPMessage &msg);
 [[nodiscard]] MTPMessage DeserializeMtpMessage(const std::vector<char> &data);
 
+void AcceptAllChatJoinRequests(
+    not_null<PeerData*> peer,
+    Fn<void()> done,
+    Fn<void()> fail);
+
 } // namespace AhiGram::Utils

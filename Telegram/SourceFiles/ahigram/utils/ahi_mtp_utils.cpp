@@ -8,6 +8,10 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 
 #include "ahi_mtp_utils.h"
 
+#include "apiwrap.h"
+#include "data/data_peer.h"
+#include "main/main_session.h"
+
 namespace AhiGram::Utils {
 
 std::vector<char> SerializeMtpMessage(const MTPMessage &msg) {
@@ -30,6 +34,28 @@ MTPMessage DeserializeMtpMessage(const std::vector<char> &data) {
         return MTPMessage();
     }
     return msg;
+}
+
+// AhiGram
+void AcceptAllChatJoinRequests(
+        not_null<PeerData*> peer,
+        Fn<void()> done,
+        Fn<void()> fail) {
+    using Flag = MTPmessages_HideAllChatJoinRequests::Flag;
+    peer->session().api().request(MTPmessages_HideAllChatJoinRequests(
+        MTP_flags(Flag::f_approved),
+        peer->input(),
+        MTPstring()
+    )).done([=](const MTPUpdates &result) {
+        peer->session().api().applyUpdates(result);
+        if (done) {
+            done();
+        }
+    }).fail([=] {
+        if (fail) {
+            fail();
+        }
+    }).send();
 }
 
 } // namespace AhiGram::Utils

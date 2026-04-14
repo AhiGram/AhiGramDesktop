@@ -494,6 +494,8 @@ void WrapWidget::setupTopBarMenuToggle() {
 		}, _topBar->lifetime());
 	} else if (key.giftsPeer()) {
 		addTopBarMenuButton();
+	} else if (section.type() == Section::Type::RequestsList) {
+		addTopBarMenuButton();
 	}
 }
 

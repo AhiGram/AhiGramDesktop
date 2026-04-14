@@ -55,6 +55,7 @@ public:
 
 	rpl::producer<QString> title() override;
 
+	void fillTopBarMenu(const Ui::Menu::MenuCallback &addAction) override; // AhiGram
 private:
 	void saveState(not_null<Memento*> memento);
 	void restoreState(not_null<Memento*> memento);

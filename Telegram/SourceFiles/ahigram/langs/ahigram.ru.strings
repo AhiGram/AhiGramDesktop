@@ -15,3 +15,6 @@
 "ahigram_clear_deleted_messages_confirm" = "Очистить всю базу данных удалённых сообщений?";
 "ahigram_other_section" = "Прочее";
 "ahigram_disable_colored_buttons" = "Выключить цветные кнопки";
+"ahigram_accept_all_requests" = "Принять все заявки?";
+"ahigram_accept_all_requests_confirm" = "Это действие примет все ожидающие заявки на вступление в этот канал.";
+"ahigram_accept_all" = "Принять все";

@@ -14,6 +14,14 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/ui_utility.h"
 #include "lang/lang_keys.h"
 #include "styles/style_info.h"
+#include "styles/style_menu_icons.h"
+#include "ui/widgets/menu/menu.h"
+#include "ui/widgets/menu/menu_add_action_callback.h"
+#include "ui/boxes/confirm_box.h"
+
+// AhiGram includes
+#include "ahigram/utils/ahi_mtp_utils.h"
+#include "ahigram/ahi_lang.h"
 
 namespace Info::RequestsList {
 namespace {
@@ -40,13 +48,12 @@ public:
 	void saveState(not_null<Memento*> memento);
 	void restoreState(not_null<Memento*> memento);
 
+	std::shared_ptr<Main::SessionShow> peerListUiShow() override;
+
 protected:
 	void visibleTopBottomUpdated(
 		int visibleTop,
 		int visibleBottom) override;
-
-private:
-	using ListWidget = PeerListContent;
 
 	// PeerListContentDelegate interface
 	void peerListSetTitle(rpl::producer<QString> title) override;
@@ -58,7 +65,9 @@ private:
 	void peerListAddSelectedRowInBunch(not_null<PeerListRow*> row) override;
 	void peerListFinishSelectedRowsBunch() override;
 	void peerListSetDescription(object_ptr<Ui::FlatLabel> description) override;
-	std::shared_ptr<Main::SessionShow> peerListUiShow() override;
+
+private:
+	using ListWidget = PeerListContent;
 
 	object_ptr<ListWidget> setupList(
 		RpWidget *parent,
@@ -185,6 +194,29 @@ void InnerWidget::peerListSetDescription(
 
 std::shared_ptr<Main::SessionShow> InnerWidget::peerListUiShow() {
 	return _show;
+}
+
+// AhiGram
+void Widget::fillTopBarMenu(const Ui::Menu::MenuCallback &addAction) {
+	const auto peer = _inner->peer();
+	addAction(
+		AhiGram::tr(u"ahigram_accept_all"_q),
+		Fn<void()>([=] {
+			_inner->peerListUiShow()->show(Ui::MakeConfirmBox({
+				.text = AhiGram::tr(u"ahigram_accept_all_requests_confirm"_q),
+				.confirmed = [=](Fn<void()> closeBox) {
+					closeBox();
+					AhiGram::Utils::AcceptAllChatJoinRequests(
+						peer,
+						nullptr,
+						nullptr);
+				},
+				.confirmText = AhiGram::tr(u"ahigram_accept_all"_q),
+				.cancelText = tr::lng_cancel(),
+				.title = AhiGram::tr(u"ahigram_accept_all_requests"_q),
+			}));
+		}),
+		&st::menuIconSelect);
 }
 
 Memento::Memento(not_null<PeerData*> peer)
