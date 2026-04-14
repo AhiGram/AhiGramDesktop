@@ -3925,23 +3925,14 @@ void History::insertMessageToBlocks(not_null<HistoryItem*> item) {
 
 // AhiGram
 void History::ahiQueueDeletedMessage(const MTPMessage &message) {
-	if (loadedAtBottom() && minMsgId() > 0) {
-		const auto minId = loadedAtTop() ? MsgId(0) : minMsgId();
-		if (IdFromMessage(message) >= minId) {
-			ahiRestoreDeletedMessage(message);
-			return;
-		}
-	}
 	_ahiPendingGhosts.push_back(message);
+	ahiCheckPendingGhosts();
 }
 
 // AhiGram
 void History::ahiRestoreDeletedMessage(const MTPMessage &message) {
-	if (message.type() != mtpc_message) {
-		return;
-	}
 	const auto id = IdFromMessage(message);
-	if (!IsServerMsgId(id)) {
+	if (message.type() != mtpc_message || !IsServerMsgId(id)) {
 		return;
 	}
 	if (const auto existing = owner().message(peer->id, id)) {
@@ -3952,12 +3943,7 @@ void History::ahiRestoreDeletedMessage(const MTPMessage &message) {
 		return;
 	}
 	const auto wasEmpty = isEmpty();
-	const auto item = createItem(
-		id,
-		message,
-		MessageFlags(),
-		false,
-		false);
+	const auto item = createItem(id, message, {}, false, false);
 	item->setAhiDeleted();
 	insertMessageToBlocks(item);
 	session().changes().messageUpdated(
@@ -3965,6 +3951,37 @@ void History::ahiRestoreDeletedMessage(const MTPMessage &message) {
 		Data::MessageUpdate::Flag::NewAdded);
 	if (!wasEmpty) {
 		owner().notifyHistoryChangeDelayed(this);
+	}
+}
+
+// AhiGram
+void History::ahiCheckPendingGhosts() {
+	if (_ahiPendingGhosts.empty() || !loadedAtBottom() || minMsgId() <= 0) {
+		return;
+	}
+	const auto minId = loadedAtTop() ? MsgId(0) : minMsgId();
+	auto toInsert = std::vector<MTPMessage>();
+	_ahiPendingGhosts.erase(std::remove_if(
+		_ahiPendingGhosts.begin(),
+		_ahiPendingGhosts.end(),
+		[&](const MTPMessage &msg) {
+			if (IdFromMessage(msg) >= minId) {
+				toInsert.push_back(msg);
+				return true;
+			}
+			return false;
+		}), _ahiPendingGhosts.end());
+
+	if (toInsert.empty()) {
+		return;
+	}
+	std::sort(toInsert.begin(), toInsert.end(), [](
+			const MTPMessage &a,
+			const MTPMessage &b) {
+		return IdFromMessage(a) < IdFromMessage(b);
+	});
+	for (const auto &msg : toInsert) {
+		ahiRestoreDeletedMessage(msg);
 	}
 }
 
@@ -3994,33 +4011,7 @@ void History::checkLocalMessages() {
 	} else {
 		checkNewPeerMessages();
 	}
-	// AhiGram
-	if (loadedAtBottom() && !_ahiPendingGhosts.empty() && minMsgId() > 0) {
-		const auto minId = loadedAtTop() ? MsgId(0) : minMsgId();
-
-		auto toInsert = std::vector<MTPMessage>();
-		auto stillPending = std::vector<MTPMessage>();
-
-		for (const auto &msg : _ahiPendingGhosts) {
-			const auto id = IdFromMessage(msg);
-			if (id >= minId) {
-				toInsert.push_back(msg);
-			} else {
-				stillPending.push_back(msg);
-			}
-		}
-
-		_ahiPendingGhosts = std::move(stillPending);
-
-		std::sort(toInsert.begin(), toInsert.end(), [](
-				const MTPMessage &a, const MTPMessage &b) {
-			return IdFromMessage(a) < IdFromMessage(b);
-		});
-
-		for (const auto &msg : toInsert) {
-			ahiRestoreDeletedMessage(msg);
-		}
-	}
+	ahiCheckPendingGhosts(); // AhiGram
 }
 
 HistoryStreamedDrafts &History::streamedDrafts() {

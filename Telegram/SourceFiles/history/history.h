@@ -690,7 +690,7 @@ private:
 	HistoryView::SendActionPainter _sendActionPainter;
 
 	std::vector<MTPMessage> _ahiPendingGhosts; // AhiGram
-
+	void ahiCheckPendingGhosts(); // AhiGram
 
 };
 

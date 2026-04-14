@@ -41,8 +41,8 @@ void Database::init() {
 		QDir().mkpath(tdata);
 	}
 
-	const auto dbPath = (tdata + "ahigram_messages.sqlite").toStdString();
-	_storage = std::make_unique<Storage>(detail::makeSavedMessagesStorage(dbPath));
+	_dbPath = tdata + "ahigram_messages.sqlite";
+	_storage = std::make_unique<Storage>(detail::makeSavedMessagesStorage(_dbPath.toStdString()));
 
 	static constexpr int kCurrentDbVersion = 2;
 	try {
@@ -59,12 +59,12 @@ void Database::init() {
 	_initialized = true;
 
 	LOG(("AhiGram DB: initialized at %1 (v%2)").arg(
-		QString::fromStdString(dbPath),
+		_dbPath,
 		QString::number(kCurrentDbVersion)));
 }
 
 void Database::upsertMessage(const SavedMessage &msg) {
-    if (!_initialized) return;
+    init();
     try {
         _storage->replace(msg);
     } catch (const std::exception &e) {
@@ -86,7 +86,7 @@ std::pair<int64_t, int64_t> Database::cleanupInfo() {
 }
 
 void Database::clearDeletedMessages() {
-    if (!_initialized) return;
+    init();
     try {
         using namespace sqlite_orm;
         _storage->transaction([&] {
@@ -100,7 +100,7 @@ void Database::clearDeletedMessages() {
 }
 
 void Database::deleteMessage(int64_t ownerId, int64_t peerId, int64_t msgId) { 
-    if (!_initialized) return;
+    init();
     try {
         using namespace sqlite_orm;
         _storage->remove_all<SavedMessage>(
@@ -116,7 +116,7 @@ void Database::deleteMessage(int64_t ownerId, int64_t peerId, int64_t msgId) {
 }
 
 void Database::markDeleted(int64_t ownerId, int64_t peerId, int64_t msgId) { 
-    if (!_initialized) return;
+    init();
     try {
         using namespace sqlite_orm;
         _storage->update_all(
@@ -134,7 +134,7 @@ void Database::markDeleted(int64_t ownerId, int64_t peerId, int64_t msgId) {
 
 std::vector<SavedMessage> Database::getAllDeletedUserMessages(
         int64_t ownerId) const {
-    if (!_initialized) return {};
+    const_cast<Database*>(this)->init();
     try {
         using namespace sqlite_orm;
         auto results = _storage->get_all<SavedMessage>(
@@ -161,9 +161,7 @@ std::vector<SavedMessage> Database::getAllDeletedUserMessages(
 std::vector<SavedMessage> Database::getDeletedUserMessagesForPeer(
         int64_t ownerId,
         int64_t peerId) const {
-    if (!_initialized) {
-        return {};
-    }
+    const_cast<Database*>(this)->init();
     try {
         using namespace sqlite_orm;
         return _storage->get_all<SavedMessage>(
@@ -181,7 +179,7 @@ std::vector<SavedMessage> Database::getDeletedUserMessagesForPeer(
 }
 
 bool Database::hasMessage(int64_t ownerId, int64_t peerId, int64_t msgId) const {
-    if (!_initialized) return false;
+    const_cast<Database*>(this)->init();
     try {
         using namespace sqlite_orm;
         return _storage->count<SavedMessage>(
