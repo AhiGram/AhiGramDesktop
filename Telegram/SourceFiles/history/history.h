@@ -462,6 +462,7 @@ public:
 
 	void refreshHiddenLinksItems();
 
+	void ahiQueueDeletedMessage(const MTPMessage &message); // AhiGram
 	void ahiRestoreDeletedMessage(const MTPMessage &message); // AhiGram
 
 	const not_null<PeerData*> peer;
@@ -687,6 +688,8 @@ private:
 	QString _topPromotedType;
 
 	HistoryView::SendActionPainter _sendActionPainter;
+
+	std::vector<MTPMessage> _ahiPendingGhosts; // AhiGram
 
 
 };

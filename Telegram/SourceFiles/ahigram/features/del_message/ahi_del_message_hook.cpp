@@ -254,7 +254,7 @@ void ProcessRestoreBatch(
 		if (mtp.type() != mtpc_message) {
 			continue;
 		}
-		session->history(peerId)->ahiRestoreDeletedMessage(mtp);
+		session->history(peerId)->ahiQueueDeletedMessage(mtp);
 	}
 	if (state->index < n) {
 		crl::on_main(&session->session(), [=] {
@@ -313,7 +313,7 @@ void restoreDeletedPrivateMessagesForPeer(
 		if (mtp.type() != mtpc_message) {
 			continue;
 		}
-		session->history(peerId)->ahiRestoreDeletedMessage(mtp);
+		session->history(peerId)->ahiQueueDeletedMessage(mtp);
 	}
 	session->sendHistoryChangeNotifications();
 }

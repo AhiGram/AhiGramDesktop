@@ -3509,7 +3509,7 @@ MsgId History::minMsgId() const {
 	for (const auto &block : blocks) {
 		for (const auto &message : block->messages) {
 			const auto item = message->data();
-			if (item->isRegular()) {
+			if (item->isRegular() && !item->isAhiDeleted()) {
 				return item->id;
 			}
 		}
@@ -3521,7 +3521,7 @@ MsgId History::maxMsgId() const {
 	for (const auto &block : ranges::views::reverse(blocks)) {
 		for (const auto &message : ranges::views::reverse(block->messages)) {
 			const auto item = message->data();
-			if (item->isRegular()) {
+			if (item->isRegular() && !item->isAhiDeleted()) {
 				return item->id;
 			}
 		}
@@ -3713,7 +3713,7 @@ MsgRange History::rangeForDifferenceRequest() const {
 	for (const auto &block : blocks) {
 		for (const auto &item : block->messages) {
 			const auto id = item->data()->id;
-			if (id > 0) {
+			if (id > 0 && !item->data()->isAhiDeleted()) {
 				fromId = id;
 				break;
 			}
@@ -3725,7 +3725,7 @@ MsgRange History::rangeForDifferenceRequest() const {
 			const auto &block = blocks[--blockIndex];
 			for (auto itemIndex = block->messages.size(); itemIndex > 0;) {
 				const auto id = block->messages[--itemIndex]->data()->id;
-				if (id > 0) {
+				if (id > 0 && !block->messages[itemIndex]->data()->isAhiDeleted()) {
 					toId = id;
 					break;
 				}
@@ -3752,7 +3752,7 @@ Data::HistoryMessages &History::messages() {
 		for (const auto &block : blocks) {
 			for (const auto &view : block->messages) {
 				const auto item = view->data();
-				if (item->isRegular()) {
+				if (item->isRegular() && !item->isAhiDeleted()) {
 					const auto id = item->id;
 					if (!list.empty() && list.back() >= id) {
 						sort = true;
@@ -3924,6 +3924,18 @@ void History::insertMessageToBlocks(not_null<HistoryItem*> item) {
 }
 
 // AhiGram
+void History::ahiQueueDeletedMessage(const MTPMessage &message) {
+	if (loadedAtBottom() && minMsgId() > 0) {
+		const auto minId = loadedAtTop() ? MsgId(0) : minMsgId();
+		if (IdFromMessage(message) >= minId) {
+			ahiRestoreDeletedMessage(message);
+			return;
+		}
+	}
+	_ahiPendingGhosts.push_back(message);
+}
+
+// AhiGram
 void History::ahiRestoreDeletedMessage(const MTPMessage &message) {
 	if (message.type() != mtpc_message) {
 		return;
@@ -3948,50 +3960,6 @@ void History::ahiRestoreDeletedMessage(const MTPMessage &message) {
 		false);
 	item->setAhiDeleted();
 	insertMessageToBlocks(item);
-	if (!wasEmpty && item->isRegular()) {
-		const auto from = loadedAtTop() ? 0 : minMsgId();
-		const auto till = loadedAtBottom() ? ServerMaxMsgId : maxMsgId();
-		if (_messages) {
-			_messages->addExisting(item->id, { from, till });
-		}
-		if (const auto types = item->sharedMediaTypes()) {
-			auto &storage = session().storage();
-			storage.add(Storage::SharedMediaAddExisting(
-				peer->id,
-				MsgId(0),
-				PeerId(0),
-				types,
-				item->id,
-				{ from, till }));
-			if (types.test(Storage::SharedMediaType::Pinned)) {
-				setHasPinnedMessages(true);
-			}
-			if (const auto topic = item->topic()) {
-				storage.add(Storage::SharedMediaAddExisting(
-					peer->id,
-					topic->rootId(),
-					PeerId(),
-					types,
-					item->id,
-					{ item->id, item->id }));
-				if (types.test(Storage::SharedMediaType::Pinned)) {
-					topic->setHasPinnedMessages(true);
-				}
-			}
-			if (const auto sublist = item->savedSublist()) {
-				storage.add(Storage::SharedMediaAddExisting(
-					peer->id,
-					MsgId(),
-					item->sublistPeerId(),
-					types,
-					item->id,
-					{ item->id, item->id }));
-				if (types.test(Storage::SharedMediaType::Pinned)) {
-					sublist->setHasPinnedMessages(true);
-				}
-			}
-		}
-	}
 	session().changes().messageUpdated(
 		item,
 		Data::MessageUpdate::Flag::NewAdded);
@@ -4025,6 +3993,33 @@ void History::checkLocalMessages() {
 		insertJoinedMessage();
 	} else {
 		checkNewPeerMessages();
+	}
+	// AhiGram
+	if (loadedAtBottom() && !_ahiPendingGhosts.empty() && minMsgId() > 0) {
+		const auto minId = loadedAtTop() ? MsgId(0) : minMsgId();
+
+		auto toInsert = std::vector<MTPMessage>();
+		auto stillPending = std::vector<MTPMessage>();
+
+		for (const auto &msg : _ahiPendingGhosts) {
+			const auto id = IdFromMessage(msg);
+			if (id >= minId) {
+				toInsert.push_back(msg);
+			} else {
+				stillPending.push_back(msg);
+			}
+		}
+
+		_ahiPendingGhosts = std::move(stillPending);
+
+		std::sort(toInsert.begin(), toInsert.end(), [](
+				const MTPMessage &a, const MTPMessage &b) {
+			return IdFromMessage(a) < IdFromMessage(b);
+		});
+
+		for (const auto &msg : toInsert) {
+			ahiRestoreDeletedMessage(msg);
+		}
 	}
 }
 
@@ -4192,6 +4187,7 @@ std::vector<MsgId> History::collectMessagesFromParticipantToDelete(
 void History::clear(ClearType type, bool markEmpty) {
 	_unreadBarView = nullptr;
 	_firstUnreadView = nullptr;
+	_ahiPendingGhosts.clear(); // AhiGram
 	removeJoinedMessage();
 	base::take(_streamedDrafts);
 
