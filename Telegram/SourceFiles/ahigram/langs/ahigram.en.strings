@@ -18,3 +18,4 @@
 "ahigram_accept_all_requests" = "Accept all join requests?";
 "ahigram_accept_all_requests_confirm" = "This will accept all pending join requests in this channel.";
 "ahigram_accept_all" = "Accept All";
+"ahigram_disable_stories" = "Disable Stories";

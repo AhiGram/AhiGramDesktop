@@ -99,8 +99,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtWidgets/QScrollBar>
 #include <QtWidgets/QTextEdit>
 
-// AhiGram include
+// AhiGram includes
 #include "ahigram/ahi_lang.h"
+#include "ahigram/core/ahi_storage.h"
 
 namespace Dialogs {
 namespace {
@@ -1478,6 +1479,10 @@ void Widget::setupStories() {
 	_stories->toggleExpandedRequests(
 	) | rpl::on_next([=](bool expanded) {
 		const auto position = _scroll->position();
+		// AhiGram
+		if (expanded && position.overscroll == 0) {
+			_scroll->scrollToY(0);
+		}
 		if (!expanded) {
 			_scroll->setOverscrollDefaults(0, 0);
 		} else if (position.value > 0 || position.overscroll >= 0) {
@@ -1497,6 +1502,11 @@ void Widget::setupStories() {
 	_stories->widthValue() | rpl::on_next([=] {
 		updateLockUnlockPosition();
 	}, lifetime());
+	// AhiGram
+	::AhiGram::Storage::Settings::Instance().data().disableStories.value(
+	) | rpl::on_next([=](bool disabled) {
+		_stories->setToggledHidden(disabled, true);
+	}, _stories->lifetime());
 }
 
 void Widget::storiesToggleExplicitExpand(bool expand) {
@@ -2385,9 +2395,13 @@ void Widget::updateStoriesVisibility() {
 		|| !_searchState.query.isEmpty()
 		|| _searchState.inChat
 		|| suggestionsAnimation;
-	const auto hidden = hiddenInstant || hiddenAnimated;
+	const auto hidden = hiddenInstant
+		|| hiddenAnimated
+		|| AhiGram::Storage::Settings::Instance().data().disableStories.current();
 	const auto changed = (_stories->toggledHidden() != hidden);
-	_stories->setToggledHidden(hiddenInstant, hiddenAnimated);
+	_stories->setToggledHidden(
+		hiddenInstant || (hidden && !hiddenAnimated),
+		hiddenAnimated);
 	if (changed) {
 		using Type = Ui::ElasticScroll::OverscrollType;
 		if (hidden) {

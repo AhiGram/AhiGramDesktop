@@ -18,3 +18,4 @@
 "ahigram_accept_all_requests" = "Принять все заявки?";
 "ahigram_accept_all_requests_confirm" = "Это действие примет все ожидающие заявки на вступление в этот канал.";
 "ahigram_accept_all" = "Принять все";
+"ahigram_disable_stories" = "Выключить сторис";

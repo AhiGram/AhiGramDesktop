@@ -31,6 +31,7 @@ QVariantMap SettingsData::toMap() const {
         { u"deletedMessageOpacityEnabled"_q, deletedMessageOpacityEnabled.current() },
         { u"deletedMessageOpacityPercent"_q, deletedMessageOpacityPercent.current() },
         { u"disableColoredButtons"_q, disableColoredButtons.current() },
+        { u"disableStories"_q, disableStories.current() },
     };
 }
 
@@ -53,6 +54,9 @@ void SettingsData::fillFromMap(const QVariantMap &map) {
     disableColoredButtons.force_assign(map.value(
         u"disableColoredButtons"_q,
         disableColoredButtons.current()).toBool());
+    disableStories.force_assign(map.value(
+        u"disableStories"_q,
+        disableStories.current()).toBool());
 }
 
 namespace Storage {
@@ -90,6 +94,7 @@ Settings::Settings() {
     _data.deletedMessageOpacityEnabled.changes() | rpl::on_next(markDirty, _lifetime);
     _data.deletedMessageOpacityPercent.changes() | rpl::on_next(markDirty, _lifetime);
     _data.disableColoredButtons.changes() | rpl::on_next(markDirty, _lifetime);
+    _data.disableStories.changes() | rpl::on_next(markDirty, _lifetime);
 }
 
 Settings::~Settings() {

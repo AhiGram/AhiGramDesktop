@@ -29,6 +29,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "mainwidget.h"
 #include "styles/style_dialogs.h"
 
+// AhiGram Include
+#include "ahigram/core/ahi_storage.h"
+
 namespace Data {
 namespace {
 
@@ -336,11 +339,15 @@ void Folder::updateStoriesCount(int count, int unread) {
 }
 
 int Folder::storiesCount() const {
-	return _storiesCount;
+	return AhiGram::Storage::Settings::Instance().data().disableStories.current()
+		? 0
+		: _storiesCount;
 }
 
 int Folder::storiesUnreadCount() const {
-	return _storiesUnreadCount;
+	return AhiGram::Storage::Settings::Instance().data().disableStories.current()
+		? 0
+		: _storiesUnreadCount;
 }
 
 TimeId Folder::adjustedChatListTimeId() const {

@@ -264,6 +264,19 @@ void SetupOther(
 		settings.disableColoredButtons.force_assign(toggled);
 		Core::App().notifications().updateAll();
 	}, container->lifetime());
+
+	const auto storiesButton = container->add(
+		object_ptr<Ui::SettingsButton>(
+			container,
+			AhiGram::trReactive(u"ahigram_disable_stories"_q),
+			st::ahiSettingsButtonNoIcon));
+
+	storiesButton->toggleOn(settings.disableStories.value());
+
+	storiesButton->toggledChanges() | rpl::on_next([&settings](bool toggled) {
+		settings.disableStories.force_assign(toggled);
+		Core::App().notifications().updateAll();
+	}, container->lifetime());
 }
 
 } // namespace

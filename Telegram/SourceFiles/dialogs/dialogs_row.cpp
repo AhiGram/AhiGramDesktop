@@ -36,6 +36,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_calls.h"
 #include "styles/style_dialogs.h"
 
+// AhiGram Include
+#include "ahigram/core/ahi_storage.h"
+
 namespace Dialogs {
 namespace {
 
@@ -549,11 +552,12 @@ void Row::paintUserpic(
 		? ((peer->isUser() || peer->isChannel()) ? peer : nullptr)
 		: nullptr;
 	const auto storiesFolder = peer ? nullptr : _id.folder();
-	const auto storiesHas = storiesPeer
-		? storiesPeer->hasActiveStories()
-		: storiesFolder
-		? (storiesFolder->storiesCount() > 0)
-		: false;
+	const auto storiesHas = !::AhiGram::Storage::Settings::Instance().data().disableStories.current()
+		&& (storiesPeer
+			? storiesPeer->hasActiveStories()
+			: storiesFolder
+			? (storiesFolder->storiesCount() > 0)
+			: false);
 	if (!cornerBadgeShown && !storiesHas) {
 		BasicRow::paintUserpic(p, entry, peer, videoUserpic, context, false);
 		if (!peer || !_cornerBadgeShown) {
