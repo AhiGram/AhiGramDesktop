@@ -73,6 +73,12 @@ bool IsSaveable(not_null<HistoryItem*> item) {
 		return false;
 	}
 	const auto peer = item->history()->peer;
+	if (peer->isSelf()) {
+		return false;
+	}
+	if (item->from()->id == item->history()->session().userPeerId()) {
+		return false;
+	}
 	return peerIsUser(peer->id) && !peer->isBot();
 }
 

@@ -2920,7 +2920,10 @@ void Session::processMessagesDeleted(
 				AhiGram::DelMessage::Database::Instance().init();
 				const auto ownerId = session().userPeerId().value;
 				const auto peer = i->second->history()->peer;
-				if (peer->isBot() || i->second->out()) {
+				if (peer->isBot()
+					|| i->second->out()
+					|| peer->isSelf()
+					|| (i->second->from()->id == session().userPeerId())) {
 					i->second->destroy();
 					continue;
 				}
@@ -2976,7 +2979,10 @@ void Session::processNonChannelMessagesDeleted(const QVector<MTPint> &data) {
 				AhiGram::DelMessage::Database::Instance().init();
 				const auto ownerId = session().userPeerId().value;
 				const auto peer = item->history()->peer;
-				if (peer->isBot() || item->out()) {
+				if (peer->isBot()
+					|| item->out()
+					|| peer->isSelf()
+					|| (item->from()->id == session().userPeerId())) {
 					item->destroy();
 					continue;
 				}

@@ -36,7 +36,6 @@ MTPMessage DeserializeMtpMessage(const std::vector<char> &data) {
     return msg;
 }
 
-// AhiGram
 void AcceptAllChatJoinRequests(
         not_null<PeerData*> peer,
         Fn<void()> done,
