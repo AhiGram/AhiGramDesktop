@@ -3574,6 +3574,13 @@ void HistoryWidget::updateControlsVisibility() {
 		} else if (isMuteUnmute()) {
 			toggle(_muteUnmute);
 		} else if (isBotStart()) {
+			// AhiGram 
+			const auto user = _peer->asUser();
+			const auto token = user->botInfo->startToken;
+			const auto buttonText = token.isEmpty()
+				? tr::lng_bot_start(tr::now).toUpper()
+				: (tr::lng_bot_start(tr::now) + " (" + token + ")").toUpper();
+			_botStart->setText(buttonText);
 			toggle(_botStart);
 		}
 		_kbShown = false;
