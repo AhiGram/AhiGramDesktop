@@ -9,9 +9,10 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include "ahi_del_message_helpers.h"
 
 #include "api/api_text_entities.h"
+#include "data/data_document.h"
+#include "data/data_media_types.h"
 #include "data/data_peer_id.h"
 #include "data/data_session.h"
-#include "data/data_user.h"
 #include "history/history.h"
 #include "history/history_item.h"
 #include "main/main_session.h"
@@ -51,6 +52,46 @@ std::string ExtractMediaType(const MTPMessageMedia &media) {
 	}, [](auto &&) {
 		return "";
 	});
+}
+
+QVector<MTPDocumentAttribute> BuildDocumentAttributes(
+		not_null<DocumentData*> document) {
+	auto attributes = QVector<MTPDocumentAttribute>();
+	const auto &dims = document->dimensions;
+	const auto hasDims = (dims.width() > 0 && dims.height() > 0);
+	
+	if (document->isAnimation()) {
+		attributes.push_back(MTP_documentAttributeAnimated());
+		if (hasDims && document->hasDuration()) {
+			attributes.push_back(MTP_documentAttributeVideo(
+				MTP_flags(0),
+				MTP_double(document->duration() / 1000.),
+				MTP_int(dims.width()),
+				MTP_int(dims.height()),
+				MTPint(),
+				MTPdouble(),
+				MTPstring()));
+		}
+	} else if (const auto sticker = document->sticker()) {
+		attributes.push_back(MTP_documentAttributeSticker(
+			MTP_flags(0),
+			MTP_string(sticker->alt),
+			MTP_inputStickerSetEmpty(),
+			MTPMaskCoords()));
+		if (hasDims) {
+			attributes.push_back(MTP_documentAttributeImageSize(
+				MTP_int(dims.width()),
+				MTP_int(dims.height())));
+		}
+	}
+	
+	const auto filename = document->filename();
+	if (!filename.isEmpty()) {
+		attributes.push_back(MTP_documentAttributeFilename(
+			MTP_string(filename)));
+	}
+	
+	return attributes;
 }
 
 } // namespace
@@ -120,6 +161,37 @@ MTPMessage BuildMtpFromHistoryItem(not_null<HistoryItem*> item) {
 		text.entities,
 		Api::ConvertOption::WithLocal);
 
+	auto media = MTP_messageMediaEmpty();
+	if (const auto itemMedia = item->media()) {
+		if (const auto document = itemMedia->document()) {
+			if (document->isAnimation() || document->sticker()) {
+				flags |= MTPDmessage::Flag::f_media;
+				
+				const auto attributes = BuildDocumentAttributes(document);
+				
+				using Flag = MTPDmessageMediaDocument::Flag;
+				media = MTP_messageMediaDocument(
+					MTP_flags(Flag::f_document),
+					MTP_document(
+						MTP_flags(0),
+						MTP_long(document->id),
+						MTP_long(document->_access),
+						MTP_bytes(document->_fileReference),
+						MTP_int(document->date),
+						MTP_string(document->mimeString()),
+						MTP_long(document->size),
+						MTP_vector<MTPPhotoSize>(),
+						MTPVector<MTPVideoSize>(),
+						MTP_int(document->_dc),
+						MTP_vector<MTPDocumentAttribute>(attributes)),
+					MTPVector<MTPDocument>(),
+					MTPPhoto(),
+					MTPint(),
+					MTPint());
+			}
+		}
+	}
+
 	return MTP_message(
 		MTP_flags(flags),
 		MTP_int(item->id.bare),
@@ -136,7 +208,7 @@ MTPMessage BuildMtpFromHistoryItem(not_null<HistoryItem*> item) {
 		MTPMessageReplyHeader(),
 		MTP_int(item->date()),
 		MTP_string(text.text),
-		MTP_messageMediaEmpty(),
+		media,
 		MTPReplyMarkup(),
 		entities,
 		MTPint(),

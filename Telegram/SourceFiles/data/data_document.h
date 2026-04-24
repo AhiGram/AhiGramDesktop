@@ -51,6 +51,10 @@ namespace Main {
 class Session;
 } // namespace Main
 
+namespace AhiGram::DelMessage {
+[[nodiscard]] MTPMessage BuildMtpFromHistoryItem(not_null<HistoryItem*> item);
+} // namespace AhiGram::DelMessage
+
 inline uint64 mediaMix32To64(int32 a, int32 b) {
 	return (uint64(*reinterpret_cast<uint32*>(&a)) << 32)
 		| uint64(*reinterpret_cast<uint32*>(&b));
@@ -356,6 +360,7 @@ private:
 	static constexpr Flags kStreamingSupportedNo = Flags();
 
 	friend class Serialize::Document;
+	friend MTPMessage AhiGram::DelMessage::BuildMtpFromHistoryItem(not_null<HistoryItem*>); // AhiGram
 
 	[[nodiscard]] LocationType locationType() const;
 	void validateLottieSticker();
