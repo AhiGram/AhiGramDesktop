@@ -32,6 +32,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_menu_icons.h"
 #include "styles/style_media_stories.h"
 
+// AhiGram
+#include "ahigram/core/ahi_storage.h"
+
 namespace Dialogs::Stories {
 namespace {
 
@@ -220,6 +223,9 @@ void FillSourceMenu(
 	const auto peer = owner->peer(PeerId(request.id));
 	const auto &add = request.callback;
 	if (peer->isSelf()) {
+		if (AhiGram::Storage::Settings::Instance().data().disableStories.current()) {
+			return;
+		}
 		add(tr::lng_stories_archive_button(tr::now), [=] {
 			controller->showSection(Info::Stories::Make(
 				peer,

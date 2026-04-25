@@ -941,7 +941,8 @@ void Widget::chosenRow(const ChosenRow &row) {
 		&& row.userpicClick
 		&& (row.message.fullId.msg == ShowAtUnreadMsgId)
 		&& history->peer->hasActiveStories()
-		&& !history->peer->isSelf()) {
+		&& !history->peer->isSelf()
+		&& !AhiGram::Storage::Settings::Instance().data().disableStories.current()) {
 		controller()->openPeerStories(history->peer->id);
 		return;
 	} else if (history
@@ -1011,10 +1012,13 @@ void Widget::chosenRow(const ChosenRow &row) {
 		if (row.userpicClick) {
 			const auto list = Data::StorySourcesList::Hidden;
 			const auto &sources = session().data().stories().sources(list);
-			if (!sources.empty()) {
+			if (!sources.empty() && !AhiGram::Storage::Settings::Instance().data().disableStories.current()) {
 				controller()->openPeerStories(sources.front().id, list);
 				return;
 			}
+			controller()->openFolder(folder);
+			hideChildList();
+			return;
 		}
 		if (row.newWindow) {
 			controller()->showInNewWindow(Window::SeparateId(
@@ -1463,6 +1467,9 @@ void Widget::setupStories() {
 
 	_stories->clicks(
 	) | rpl::on_next([=](uint64 id) {
+		if (AhiGram::Storage::Settings::Instance().data().disableStories.current()) {
+			return;
+		}
 		controller()->openPeerStories(PeerId(int64(id)), currentSource());
 	}, lifetime());
 
