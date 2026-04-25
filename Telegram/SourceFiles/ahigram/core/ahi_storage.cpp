@@ -32,6 +32,8 @@ QVariantMap SettingsData::toMap() const {
         { u"deletedMessageOpacityPercent"_q, deletedMessageOpacityPercent.current() },
         { u"disableColoredButtons"_q, disableColoredButtons.current() },
         { u"disableStories"_q, disableStories.current() },
+        { u"invisibleModeEnabled"_q, invisibleModeEnabled.current() },
+        { u"invisibleModeShowInMenu"_q, invisibleModeShowInMenu.current() },
     };
 }
 
@@ -57,6 +59,12 @@ void SettingsData::fillFromMap(const QVariantMap &map) {
     disableStories.force_assign(map.value(
         u"disableStories"_q,
         disableStories.current()).toBool());
+    invisibleModeEnabled.force_assign(map.value(
+        u"invisibleModeEnabled"_q,
+        invisibleModeEnabled.current()).toBool());
+    invisibleModeShowInMenu.force_assign(map.value(
+        u"invisibleModeShowInMenu"_q,
+        invisibleModeShowInMenu.current()).toBool());
 }
 
 namespace Storage {
@@ -95,6 +103,8 @@ Settings::Settings() {
     _data.deletedMessageOpacityPercent.changes() | rpl::on_next(markDirty, _lifetime);
     _data.disableColoredButtons.changes() | rpl::on_next(markDirty, _lifetime);
     _data.disableStories.changes() | rpl::on_next(markDirty, _lifetime);
+    _data.invisibleModeEnabled.changes() | rpl::on_next(markDirty, _lifetime);
+    _data.invisibleModeShowInMenu.changes() | rpl::on_next(markDirty, _lifetime);
 }
 
 Settings::~Settings() {

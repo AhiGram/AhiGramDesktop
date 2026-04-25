@@ -134,6 +134,8 @@ set(ahigram_source_files
     ahigram/features/del_message/ahi_del_message_helpers.cpp
     ahigram/features/del_message/ahi_del_message_hook.h
     ahigram/features/del_message/ahi_del_message_hook.cpp
+    ahigram/features/invisible_mode/ahi_invisible_mode.h
+    ahigram/features/invisible_mode/ahi_invisible_mode.cpp
     ahigram/utils/ahi_deleted_message_visual.cpp
     ahigram/utils/ahi_deleted_message_visual.h
     ahigram/utils/ahi_ads_utils.h

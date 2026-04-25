@@ -31,8 +31,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "core/application.h"
 #include "apiwrap.h"
 
-// AhiGram Include
+// AhiGram Includes
 #include "ahigram/features/del_message/ahi_del_message_hook.h"
+#include "ahigram/features/invisible_mode/ahi_invisible_mode.h"
 
 namespace Data {
 namespace {
@@ -705,6 +706,13 @@ void Histories::sendReadRequests() {
 
 void Histories::sendReadRequest(not_null<History*> history, State &state) {
 	Expects(state.willReadTill > state.sentReadTill);
+	
+	// AhiGram
+	if (AhiGram::InvisibleMode::IsEnabled()) {
+		state.willReadTill = 0;
+		state.willReadWhen = 0;
+		return;
+	}
 
 	const auto tillId = state.sentReadTill = base::take(state.willReadTill);
 	state.willReadWhen = 0;

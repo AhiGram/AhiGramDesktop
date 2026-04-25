@@ -60,30 +60,7 @@ void SetupAhiBypass(
 	}, container->lifetime());
 }
 
-void SetupDisableTelegramAds(
-		not_null<Ui::VerticalLayout*> container,
-		AhiGram::SettingsData &settings) {
-	Ui::AddSkip(container);
-	Ui::AddDivider(container);
-	Ui::AddSkip(container);
-	Ui::AddSubsectionTitle(
-		container,
-		AhiGram::trReactive(u"ahigram_ads_section"_q));
 
-	const auto disableAdsButton = container->add(
-		object_ptr<Ui::SettingsButton>(
-			container,
-			AhiGram::trReactive(u"ahigram_disable_telegram_ads"_q),
-			st::ahiSettingsButtonNoIcon));
-	disableAdsButton->toggleOn(settings.disableTelegramAds.value());
-
-	disableAdsButton->toggledChanges(
-	) | rpl::filter([&settings](bool toggled) {
-		return toggled != settings.disableTelegramAds.current();
-	}) | rpl::on_next([=, &settings](bool toggled) {
-		settings.disableTelegramAds.force_assign(toggled);
-	}, container->lifetime());
-}
 
 void SetupDelMessageOptions(
 		not_null<Ui::VerticalLayout*> container,
@@ -194,9 +171,55 @@ void SetupDeletedMessageOpacity(
 	opacityRow->setVisible(true);
 }
 
-void SetupClearDeletedMessages(
+void SetupOther(
 		not_null<Ui::VerticalLayout*> container,
-		not_null<Window::SessionController*> controller) {
+		not_null<Window::SessionController*> controller,
+		AhiGram::SettingsData &settings) {
+	Ui::AddSkip(container);
+	Ui::AddDivider(container);
+	Ui::AddSkip(container);
+	Ui::AddSubsectionTitle(container, AhiGram::trReactive(u"ahigram_other_section"_q));
+
+	const auto disableAdsButton = container->add(
+		object_ptr<Ui::SettingsButton>(
+			container,
+			AhiGram::trReactive(u"ahigram_disable_telegram_ads"_q),
+			st::ahiSettingsButtonNoIcon));
+	disableAdsButton->toggleOn(settings.disableTelegramAds.value());
+
+	disableAdsButton->toggledChanges(
+	) | rpl::filter([&settings](bool toggled) {
+		return toggled != settings.disableTelegramAds.current();
+	}) | rpl::on_next([=, &settings](bool toggled) {
+		settings.disableTelegramAds.force_assign(toggled);
+	}, container->lifetime());
+
+	const auto button = container->add(
+		object_ptr<Ui::SettingsButton>(
+			container,
+			AhiGram::trReactive(u"ahigram_disable_colored_buttons"_q),
+			st::ahiSettingsButtonNoIcon));
+	
+	button->toggleOn(settings.disableColoredButtons.value());
+
+	button->toggledChanges() | rpl::on_next([&settings](bool toggled) {
+		settings.disableColoredButtons.force_assign(toggled);
+		Core::App().notifications().updateAll();
+	}, container->lifetime());
+
+	const auto storiesButton = container->add(
+		object_ptr<Ui::SettingsButton>(
+			container,
+			AhiGram::trReactive(u"ahigram_disable_stories"_q),
+			st::ahiSettingsButtonNoIcon));
+
+	storiesButton->toggleOn(settings.disableStories.value());
+
+	storiesButton->toggledChanges() | rpl::on_next([&settings](bool toggled) {
+		settings.disableStories.force_assign(toggled);
+		Core::App().notifications().updateAll();
+	}, container->lifetime());
+
 	Ui::AddSkip(container);
 	Ui::AddDivider(container);
 	Ui::AddSkip(container);
@@ -246,36 +269,42 @@ void SetupClearDeletedMessages(
 	});
 }
 
-void SetupOther(
+void SetupPrivacy(
 		not_null<Ui::VerticalLayout*> container,
 		AhiGram::SettingsData &settings) {
 	Ui::AddSkip(container);
-	Ui::AddSubsectionTitle(container, AhiGram::trReactive(u"ahigram_other_section"_q));
+	Ui::AddDivider(container);
+	Ui::AddSkip(container);
+	Ui::AddSubsectionTitle(container, AhiGram::trReactive(u"ahigram_privacy_section"_q));
 
-	const auto button = container->add(
+	const auto invisibleModeButton = container->add(
 		object_ptr<Ui::SettingsButton>(
 			container,
-			AhiGram::trReactive(u"ahigram_disable_colored_buttons"_q),
+			AhiGram::trReactive(u"ahigram_invisible_mode_title"_q),
 			st::ahiSettingsButtonNoIcon));
-	
-	button->toggleOn(settings.disableColoredButtons.value());
 
-	button->toggledChanges() | rpl::on_next([&settings](bool toggled) {
-		settings.disableColoredButtons.force_assign(toggled);
-		Core::App().notifications().updateAll();
+	invisibleModeButton->toggleOn(settings.invisibleModeEnabled.value());
+
+	invisibleModeButton->toggledChanges(
+	) | rpl::filter([&settings](bool toggled) {
+		return toggled != settings.invisibleModeEnabled.current();
+	}) | rpl::on_next([&settings](bool toggled) {
+		settings.invisibleModeEnabled.force_assign(toggled);
 	}, container->lifetime());
 
-	const auto storiesButton = container->add(
+	const auto showInMenuButton = container->add(
 		object_ptr<Ui::SettingsButton>(
 			container,
-			AhiGram::trReactive(u"ahigram_disable_stories"_q),
+			AhiGram::trReactive(u"ahigram_invisible_mode_show_in_menu"_q),
 			st::ahiSettingsButtonNoIcon));
 
-	storiesButton->toggleOn(settings.disableStories.value());
+	showInMenuButton->toggleOn(settings.invisibleModeShowInMenu.value());
 
-	storiesButton->toggledChanges() | rpl::on_next([&settings](bool toggled) {
-		settings.disableStories.force_assign(toggled);
-		Core::App().notifications().updateAll();
+	showInMenuButton->toggledChanges(
+	) | rpl::filter([&settings](bool toggled) {
+		return toggled != settings.invisibleModeShowInMenu.current();
+	}) | rpl::on_next([&settings](bool toggled) {
+		settings.invisibleModeShowInMenu.force_assign(toggled);
 	}, container->lifetime());
 }
 
@@ -298,11 +327,10 @@ void AhiMainSettings::setupContent() {
 	auto &settings = ::AhiGram::Storage::Settings::Instance().data();
 
 	SetupAhiBypass(not_null(content), settings);
-	SetupDisableTelegramAds(not_null(content), settings);
 	SetupDelMessageOptions(not_null(content), _controller, settings);
 	SetupDeletedMessageOpacity(not_null(content), settings);
-	SetupClearDeletedMessages(not_null(content), _controller);
-	SetupOther(not_null(content), settings);
+	SetupPrivacy(not_null(content), settings);
+	SetupOther(not_null(content), _controller, settings);
 
 	Ui::ResizeFitChild(this, content);
 }

@@ -83,6 +83,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 // AhiGram Includes
 #include "ahigram/ui/settings/ahi_settings_menu.h"
 #include "ahigram/ahi_lang.h"
+#include "ahigram/core/ahi_storage.h"
 #include "styles/style_ahi_settings.h"
 
 namespace Window {
@@ -756,6 +757,32 @@ void MainMenu::setupMenu() {
 		controller->showSettings();
 	});
 
+	// AhiGram
+	auto &ahiSettings = AhiGram::Storage::Settings::Instance().data();
+
+	const auto createToggle = [=, &ahiSettings] {
+		_invisibleModeToggle = addAction(
+			AhiGram::trReactive(u"ahigram_invisible_mode_title"_q),
+			{ &st::ahiInvisibleSettings }
+		)->toggleOn(ahiSettings.invisibleModeEnabled.value());
+
+		_invisibleModeToggle->toggledChanges(
+		) | rpl::filter([&ahiSettings](bool enabled) {
+			return (enabled != ahiSettings.invisibleModeEnabled.current());
+		}) | rpl::on_next([&ahiSettings](bool enabled) {
+			ahiSettings.invisibleModeEnabled = enabled;
+		}, _invisibleModeToggle->lifetime());
+	};
+
+	ahiSettings.invisibleModeShowInMenu.value(
+	) | rpl::on_next([=](bool show) {
+		if (show && !_invisibleModeToggle) {
+			createToggle();
+		} else if (!show && _invisibleModeToggle) {
+			delete _invisibleModeToggle.data();
+			_invisibleModeToggle = nullptr;
+		}
+	}, lifetime());
 
 	_nightThemeToggle = addAction(
 		tr::lng_menu_night_mode(),

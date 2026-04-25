@@ -70,6 +70,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "apiwrap.h"
 #include "ui/text/format_values.h" // Ui::FormatPhone
 
+// AhiGram
+#include "ahigram/features/invisible_mode/ahi_invisible_mode.h"
+
 namespace Api {
 namespace {
 
@@ -1013,6 +1016,13 @@ void Updates::updateOnline(crl::time lastNonIdleTime, bool gotOtherOffline) {
 
 		_lastWasOnline = isOnline;
 		_lastSetOnline = ms;
+
+		// AhiGram
+		if (AhiGram::InvisibleMode::IsEnabled()) {
+			_onlineTimer.callOnce(config.onlineUpdatePeriod);
+			return;
+		}
+
 		if (!Core::Quitting()) {
 			_onlineRequest = api().request(MTPaccount_UpdateStatus(
 				MTP_bool(!isOnline)

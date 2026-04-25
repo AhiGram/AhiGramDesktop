@@ -20,3 +20,4 @@ ahiSettingsButtonNoIcon: SettingsButton(ahiSettingsButton) {
 }
 
 ahiMenuIconSettings: icon {{ "ahigram/menu_settings", menuIconColor }};
+ahiInvisibleSettings: icon {{ "ahigram/invisible_settings", menuIconColor }};

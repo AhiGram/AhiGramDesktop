@@ -106,6 +106,7 @@ private:
 	QPointer<Ui::SettingsButton> _nightThemeToggle;
 	rpl::event_stream<bool> _nightThemeSwitches;
 	base::Timer _nightThemeSwitch;
+	QPointer<Ui::SettingsButton> _invisibleModeToggle; // AhiGram
 	base::unique_qptr<Ui::PopupMenu> _contextMenu;
 
 	Ui::Controls::SwipeBackResult _swipeBackData;

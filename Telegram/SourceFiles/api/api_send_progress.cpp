@@ -15,6 +15,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_peer_values.h"
 #include "apiwrap.h"
 
+// AhiGram Include
+#include "ahigram/features/invisible_mode/ahi_invisible_mode.h"
+
 namespace Api {
 namespace {
 
@@ -109,6 +112,11 @@ bool SendProgressManager::updated(const Key &key, bool doing) {
 }
 
 void SendProgressManager::send(const Key &key, int progress) {
+	// AhiGram
+	if (AhiGram::InvisibleMode::IsEnabled()) {
+		return;
+	}
+
 	if (skipRequest(key)) {
 		return;
 	}

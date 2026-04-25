@@ -27,6 +27,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/layers/show.h"
 #include "ui/text/text_utilities.h"
 
+// AhiGram Include
+#include "ahigram/features/invisible_mode/ahi_invisible_mode.h"
+
 namespace Data {
 namespace {
 
@@ -1415,6 +1418,12 @@ void Stories::checkQuitPreventFinished() {
 }
 
 void Stories::sendMarkAsReadRequests() {
+	// AhiGram
+	if (AhiGram::InvisibleMode::IsEnabled()) {
+		_markReadPending.clear();
+		return;
+	}
+
 	_markReadTimer.cancel();
 	for (auto i = begin(_markReadPending); i != end(_markReadPending);) {
 		const auto peerId = *i;
@@ -1431,7 +1440,9 @@ void Stories::sendMarkAsReadRequests() {
 }
 
 void Stories::sendIncrementViewsRequests() {
-	if (_incrementViewsPending.empty()) {
+	// AhiGram
+	if (AhiGram::InvisibleMode::IsEnabled()) {
+		_incrementViewsPending.clear();
 		return;
 	}
 	struct Prepared {
@@ -1440,6 +1451,11 @@ void Stories::sendIncrementViewsRequests() {
 	};
 	auto prepared = std::vector<Prepared>();
 	for (const auto &[peer, ids] : _incrementViewsPending) {
+		// AhiGram
+		if (_incrementViewsRequests.size() + prepared.size()
+			>= kMaxSegmentsCount) {
+			break;
+		}
 		if (_incrementViewsRequests.contains(peer)) {
 			continue;
 		}

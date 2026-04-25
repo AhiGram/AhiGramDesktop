@@ -27,6 +27,8 @@ public:
     rpl::variable<int> deletedMessageOpacityPercent = { 50 };
     rpl::variable<bool> disableColoredButtons = { false };
     rpl::variable<bool> disableStories = { false };
+    rpl::variable<bool> invisibleModeEnabled = { false };
+    rpl::variable<bool> invisibleModeShowInMenu = { false };
 
     [[nodiscard]] QVariantMap toMap() const;
     void fillFromMap(const QVariantMap &map);

@@ -13,6 +13,9 @@
 "ahigram_deleted_opacity_title" = "Deleted dim level";
 "ahigram_clear_deleted_messages" = "Clear deleted messages";
 "ahigram_clear_deleted_messages_confirm" = "Clear the deleted messages database completely?";
+"ahigram_privacy_section" = "Privacy";
+"ahigram_invisible_mode_title" = "Invisible Mode";
+"ahigram_invisible_mode_show_in_menu" = "Show in menu";
 "ahigram_other_section" = "Other";
 "ahigram_disable_colored_buttons" = "Disable colored buttons";
 "ahigram_accept_all_requests" = "Accept all join requests?";

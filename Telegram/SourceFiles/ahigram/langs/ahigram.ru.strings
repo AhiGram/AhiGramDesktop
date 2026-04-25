@@ -13,6 +13,9 @@
 "ahigram_deleted_opacity_title" = "Затемнение удалённых";
 "ahigram_clear_deleted_messages" = "Почистить Сообщения";
 "ahigram_clear_deleted_messages_confirm" = "Очистить всю базу данных удалённых сообщений?";
+"ahigram_privacy_section" = "Приватность";
+"ahigram_invisible_mode_title" = "Режим невидимки";
+"ahigram_invisible_mode_show_in_menu" = "Показать в меню";
 "ahigram_other_section" = "Прочее";
 "ahigram_disable_colored_buttons" = "Выключить цветные кнопки";
 "ahigram_accept_all_requests" = "Принять все заявки?";
