@@ -64,13 +64,11 @@ BEGIN
             VALUE "FileDescription", "AhiGram Desktop"
             VALUE "FileVersion", "6.6.1.0"
             VALUE "LegalCopyright", "Copyright (C) 2014-2026"
-            VALUE "ProductName", "AhiGram Desktop"
             VALUE "ProductVersion", "6.6.1.0"
-        END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x409, 1200
+            VALUE "CompanyName", "Telegram FZ-LLC"
+            VALUE "FileDescription", "Telegram Desktop"
+            VALUE "FileVersion", "6.7.8.0"
+            VALUE "LegalCopyright", "Copyright (C) 2014-2026"
     END
 END
 
