@@ -57,12 +57,6 @@ bool ShowWelcomeIfNeeded(
 	}();
 
 	if (session->settings().ahiWelcomeDismissed() || subscribed) {
-		if (auto content = *contentPtr) {
-			if (dynamic_cast<AhiTopBarSuggestion*>(content)) {
-				content->deleteLater();
-				*contentPtr = nullptr;
-			}
-		}
 		return false;
 	}
 
@@ -71,7 +65,6 @@ bool ShowWelcomeIfNeeded(
 		content = Ui::CreateChild<AhiTopBarSuggestion>(parent.get(), session);
 
 		content->setHideCallback([=] {
-			content->hide();
 			session->settings().setAhiWelcomeDismissed(true);
 			session->saveSettingsDelayed();
 			repeat();
