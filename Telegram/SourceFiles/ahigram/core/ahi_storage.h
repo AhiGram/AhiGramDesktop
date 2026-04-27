@@ -29,6 +29,7 @@ public:
     rpl::variable<bool> disableStories = { false };
     rpl::variable<bool> invisibleModeEnabled = { false };
     rpl::variable<bool> invisibleModeShowInMenu = { false };
+    rpl::variable<bool> welcomeShown = { false };
 
     [[nodiscard]] QVariantMap toMap() const;
     void fillFromMap(const QVariantMap &map);

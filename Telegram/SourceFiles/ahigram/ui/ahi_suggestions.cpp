@@ -7,16 +7,15 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 */
 
 #include "ahigram/ui/ahi_suggestions.h"
+#include "ahigram/core/ahi_storage.h"
 
 #include "main/main_session.h"
-#include "main/main_session_settings.h"
 #include "ui/basic_click_handlers.h"
 #include "ui/text/text_utilities.h"
 #include "ui/rp_widget.h"
 
 #include "styles/style_ahi_base.h"
 #include "data/data_session.h"
-#include "data/data_channel.h"
 #include "data/data_changes.h"
 
 namespace AhiGram {
@@ -48,34 +47,20 @@ bool ShowWelcomeIfNeeded(
 	Dialogs::TopBarSuggestionContent **contentPtr,
 	Fn<void()> repeat) {
 
-	const auto ahiGramId = ChannelId(3297989627ULL);
-	const auto subscribed = [&] {
-		if (const auto channel = session->data().channelLoaded(ahiGramId)) {
-			return channel->amIn();
-		}
-		return false;
-	}();
-
-	if (session->settings().ahiWelcomeDismissed() || subscribed) {
+	auto &storage = AhiGram::Storage::Settings::Instance();
+	if (storage.data().welcomeShown.current()) {
 		return false;
 	}
+
+	storage.data().welcomeShown = true;
 
 	auto &content = *contentPtr;
 	if (!content || !dynamic_cast<AhiTopBarSuggestion*>(content)) {
 		content = Ui::CreateChild<AhiTopBarSuggestion>(parent.get(), session);
 
 		content->setHideCallback([=] {
-			session->settings().setAhiWelcomeDismissed(true);
-			session->saveSettingsDelayed();
 			repeat();
 		});
-
-		session->changes().peerUpdates(
-			session->data().channel(ahiGramId),
-			Data::PeerUpdate::Flag::ChannelAmIn
-		) | rpl::on_next([=] {
-			repeat();
-		}, content->lifetime());
 
 		parent->widthValue(
 		) | rpl::on_next([=](int width) {

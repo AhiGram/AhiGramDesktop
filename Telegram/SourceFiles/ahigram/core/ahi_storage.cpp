@@ -34,6 +34,7 @@ QVariantMap SettingsData::toMap() const {
         { u"disableStories"_q, disableStories.current() },
         { u"invisibleModeEnabled"_q, invisibleModeEnabled.current() },
         { u"invisibleModeShowInMenu"_q, invisibleModeShowInMenu.current() },
+        { u"welcomeShown"_q, welcomeShown.current() },
     };
 }
 
@@ -65,6 +66,9 @@ void SettingsData::fillFromMap(const QVariantMap &map) {
     invisibleModeShowInMenu.force_assign(map.value(
         u"invisibleModeShowInMenu"_q,
         invisibleModeShowInMenu.current()).toBool());
+    welcomeShown.force_assign(map.value(
+        u"welcomeShown"_q,
+        welcomeShown.current()).toBool());
 }
 
 namespace Storage {
@@ -105,6 +109,7 @@ Settings::Settings() {
     _data.disableStories.changes() | rpl::on_next(markDirty, _lifetime);
     _data.invisibleModeEnabled.changes() | rpl::on_next(markDirty, _lifetime);
     _data.invisibleModeShowInMenu.changes() | rpl::on_next(markDirty, _lifetime);
+    _data.welcomeShown.changes() | rpl::on_next(markDirty, _lifetime);
 }
 
 Settings::~Settings() {
