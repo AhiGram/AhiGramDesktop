@@ -12,7 +12,7 @@ It uses the official [Telegram API][telegram_api] and the secure [MTProto][teleg
 </div>
 
 ## Privacy Features
-- **Ghost Mode** — view messages, stories, and chats without updating your online status or activity indicators.
+- **Invisible Mode** — view messages, stories, and chats without updating your online status or activity indicators.
 - **Deleted Messages Access** — allows viewing messages that were removed from chats. Media files are cached in the background, and removed messages may reappear after restarting the client.
 - **Disable Sponsored Messages** — optional setting to hide Telegram’s sponsored content inside the client.
 
@@ -30,6 +30,16 @@ It uses the official [Telegram API][telegram_api] and the secure [MTProto][teleg
 - Based on the latest Telegram Desktop updates.
 - Minor interface adjustments.
 - Various small bug fixes and quality-of-life improvements.
+
+## Acknowledgments
+
+This project was inspired by and incorporates ideas and code from the following community projects:
+
+- [**Kotatogram Desktop**](https://github.com/kotatogram/kotatogram-desktop)
+- [**AyuGram Desktop**](https://github.com/AyuGram/AyuGramDesktop)
+- [**Materialgram**](https://github.com/KUKURUZKA165/materialgram)
+
+We are grateful to these projects and their contributors for their work and inspiration.
 
 [//]: # (LINKS)
 [telegram_api]: https://core.telegram.org
