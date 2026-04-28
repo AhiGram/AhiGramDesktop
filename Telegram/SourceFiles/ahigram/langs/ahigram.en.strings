@@ -35,6 +35,7 @@
 "ahigram_disable_telegram_ads" = "Disable Ads";
 "ahigram_disable_colored_buttons" = "Disable colored buttons";
 "ahigram_disable_stories" = "Disable Stories";
+"ahigram_hide_ai_button" = "Hide AI button";
 
 // Join Requests
 "ahigram_accept_all_requests" = "Accept all join requests?";

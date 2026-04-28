@@ -10,7 +10,9 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include "ahigram/core/ahi_storage.h"
 #include "ahigram/ahi_lang.h"
 
+#include "base/options.h"
 #include "core/application.h"
+#include "ui/controls/compose_ai_button_factory.h"
 #include "ui/widgets/buttons.h"
 #include "ui/wrap/vertical_layout.h"
 #include "ui/vertical_list.h"
@@ -83,6 +85,19 @@ void AhiOtherSettings::setupContent() {
 	storiesButton->toggledChanges() | rpl::on_next([&settings](bool toggled) {
 		settings.disableStories.force_assign(toggled);
 		Core::App().notifications().updateAll();
+	}, content->lifetime());
+
+	const auto hideAiButton = content->add(
+		object_ptr<Ui::SettingsButton>(
+			content,
+			AhiGram::trReactive(u"ahigram_hide_ai_button"_q),
+			st::ahiSettingsButtonNoIcon));
+
+	auto &aiOption = base::options::lookup<bool>(Ui::kOptionHideAiButton);
+	hideAiButton->toggleOn(rpl::single(aiOption.value()));
+
+	hideAiButton->toggledChanges() | rpl::on_next([&aiOption](bool toggled) {
+		aiOption.set(toggled);
 	}, content->lifetime());
 
 	Ui::ResizeFitChild(this, content);

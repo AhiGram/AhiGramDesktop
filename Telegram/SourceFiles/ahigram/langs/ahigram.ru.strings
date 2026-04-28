@@ -35,6 +35,7 @@
 "ahigram_disable_telegram_ads" = "Отключить рекламу";
 "ahigram_disable_colored_buttons" = "Выключить цветные кнопки";
 "ahigram_disable_stories" = "Выключить сторис";
+"ahigram_hide_ai_button" = "Скрыть кнопку AI";
 
 // Join Requests
 "ahigram_accept_all_requests" = "Принять все заявки?";

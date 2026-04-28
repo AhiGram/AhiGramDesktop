@@ -57,7 +57,6 @@ AhiCover::AhiCover(
 		p.setRenderHint(QPainter::SmoothPixmapTransform);
 
 		const auto size = st::infoProfileCover.photo.size.height();
-		const auto rect = QRect(0, 0, size, size);
 
 		const auto iconPath = u":/gui/art/logo_256.png"_q;
 		const auto icon = QImage(iconPath);
