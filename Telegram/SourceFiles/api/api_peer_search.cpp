@@ -13,6 +13,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "dialogs/ui/chat_search_in.h" // IsHashOrCashtagSearchQuery
 #include "main/main_session.h"
 
+// AhiGram Include
+#include "ahigram/utils/ahi_ads_utils.h"
+
 namespace Api {
 namespace {
 
@@ -55,8 +58,10 @@ void PeerSearch::request(
 	cache.result.query = _query;
 	if (_query.size() < kMinSponsoredQueryLength) {
 		cache.sponsoredReady = true;
-	} else if (_type == Type::WithSponsored) {
+	} else if (_type == Type::WithSponsored && !AhiGram::AdsDisabled()) {
 		requestSponsored();
+	} else {
+		cache.sponsoredReady = true;
 	}
 	requestPeers();
 }
