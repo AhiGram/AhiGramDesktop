@@ -1,24 +1,55 @@
+// Main Settings
 "ahigram_settings_title" = "Настройки AhiGram";
-"ahigram_bypass_title" = "Сеть"; 
+
+// Profile Cover
+"ahigram_profile_name" = "AhiGram Desktop";
+"ahigram_profile_channel" = "t.me/AhiGram";
+
+// Menu Sections
+"ahigram_menu_settings" = "Меню";
+
+// Network Section
+"ahigram_bypass_title" = "Сеть";
+"ahigram_auto_proxy" = "Авто Прокси";
 "ahigram_bypass_slowdown_title" = "Автоматический прокси (бета)";
-"ahigram_intro_title" = "Добро пожаловать в AhiGram Desktop, форк проекта Telegram.\nБезопасность, настраиваемые функции и переработанный интерфейс.";
-"ahigram_update_title" = "Обновить AhiGram";
-"ahigram_copy_emoji_id" = "Копировать ID";
+
+// Chat Section
+"ahigram_delmsg_section" = "Чат";
+"ahigram_deleted_messages_subsection" = "Удалённые сообщения";
 "ahigram_delete_message" = "удалено";
-"ahigram_delmsg_section" = "Удалённые сообщения";
-"ahigram_ads_section" = "Реклама";
-"ahigram_disable_telegram_ads" = "Отключить рекламу";
 "ahigram_save_del_message" = "Сохранять удалённые сообщения";
 "ahigram_load_del_message" = "Подгружать удалённые сообщения";
 "ahigram_deleted_opacity_title" = "Затемнение удалённых";
 "ahigram_clear_deleted_messages" = "Почистить Сообщения";
 "ahigram_clear_deleted_messages_confirm" = "Очистить всю базу данных удалённых сообщений?";
+
+// Privacy Section
 "ahigram_privacy_section" = "Приватность";
+"ahigram_invisible_mode_sections" = "Управление Невидимкой";
 "ahigram_invisible_mode_title" = "Режим невидимки";
 "ahigram_invisible_mode_show_in_menu" = "Показать в меню";
+
+// Other Section
 "ahigram_other_section" = "Прочее";
+"ahigram_ads_section" = "Реклама";
+"ahigram_disable_telegram_ads" = "Отключить рекламу";
 "ahigram_disable_colored_buttons" = "Выключить цветные кнопки";
+"ahigram_disable_stories" = "Выключить сторис";
+
+// Join Requests
 "ahigram_accept_all_requests" = "Принять все заявки?";
 "ahigram_accept_all_requests_confirm" = "Это действие примет все ожидающие заявки на вступление в этот канал.";
 "ahigram_accept_all" = "Принять все";
-"ahigram_disable_stories" = "Выключить сторис";
+
+// Intro & Updates
+"ahigram_intro_title" = "Добро пожаловать в AhiGram Desktop, форк проекта Telegram.\nБезопасность, настраиваемые функции и переработанный интерфейс.";
+"ahigram_update_title" = "Обновить AhiGram";
+
+// Emoji/Stickers
+"ahigram_copy_emoji_id" = "Копировать ID";
+
+// About Menu
+"ahigram_about_project" = "О проекте";
+"ahigram_github" = "GitHub";
+"ahigram_telegram_release" = "Telegram Releases";
+"ahigram_telegram_info" = "Telegram Info";

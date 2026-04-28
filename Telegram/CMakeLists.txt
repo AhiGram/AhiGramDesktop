@@ -128,6 +128,16 @@ set(ahigram_source_files
     ahigram/ui/ahi_suggestions.h
     ahigram/ui/settings/ahi_settings_menu.cpp
     ahigram/ui/settings/ahi_settings_menu.h
+    ahigram/ui/settings/ahi_settings_cover.cpp
+    ahigram/ui/settings/ahi_settings_cover.h
+    ahigram/ui/settings/ahi_settings_network.cpp
+    ahigram/ui/settings/ahi_settings_network.h
+    ahigram/ui/settings/ahi_settings_chat.cpp
+    ahigram/ui/settings/ahi_settings_chat.h
+    ahigram/ui/settings/ahi_settings_privacy.cpp
+    ahigram/ui/settings/ahi_settings_privacy.h
+    ahigram/ui/settings/ahi_settings_other.cpp
+    ahigram/ui/settings/ahi_settings_other.h
     ahigram/features/del_message/ahi_del_message_db.h
     ahigram/features/del_message/ahi_del_message_db.cpp
     ahigram/features/del_message/ahi_del_message_helpers.h
@@ -138,6 +148,8 @@ set(ahigram_source_files
     ahigram/features/invisible_mode/ahi_invisible_mode.cpp
     ahigram/utils/ahi_deleted_message_visual.cpp
     ahigram/utils/ahi_deleted_message_visual.h
+    ahigram/utils/ahi_version.cpp
+    ahigram/utils/ahi_version.h
     ahigram/utils/ahi_ads_utils.h
     ahigram/utils/ahi_region_utils.h
     ahigram/utils/ahi_mtp_utils.cpp
