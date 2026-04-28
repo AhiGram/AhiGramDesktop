@@ -30,6 +30,7 @@ public:
     rpl::variable<bool> invisibleModeEnabled = { false };
     rpl::variable<bool> invisibleModeShowInMenu = { false };
     rpl::variable<bool> welcomeShown = { false };
+    rpl::variable<QStringList> proxyChannels;
 
     [[nodiscard]] QVariantMap toMap() const;
     void fillFromMap(const QVariantMap &map);

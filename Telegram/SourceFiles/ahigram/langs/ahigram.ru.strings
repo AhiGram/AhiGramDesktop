@@ -12,9 +12,11 @@
 "ahigram_bypass_title" = "Сеть";
 "ahigram_auto_proxy" = "Авто Прокси";
 "ahigram_bypass_slowdown_title" = "Автоматический прокси (бета)";
+"ahigram_proxy_channels_title" = "Каналы для парсинга прокси";
+"ahigram_proxy_channels_add" = "Добавить канал";
 
 // Chat Section
-"ahigram_delmsg_section" = "Чат";
+"ahigram_delmsg_section" = "Чаты";
 "ahigram_deleted_messages_subsection" = "Удалённые сообщения";
 "ahigram_delete_message" = "удалено";
 "ahigram_save_del_message" = "Сохранять удалённые сообщения";

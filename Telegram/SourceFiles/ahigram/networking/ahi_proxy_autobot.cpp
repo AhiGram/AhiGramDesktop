@@ -103,7 +103,9 @@ void ProxyAutobot::fetchRemoteList() {
 }
 
 void ProxyAutobot::afterRemoteFetchFinished() {
-    const auto channelCount = static_cast<int>(Constants::kProxyChannels.size());
+    const auto &channelUsernames = AhiGram::Storage::Settings::Instance()
+        .data().proxyChannels.current();
+    const auto channelCount = channelUsernames.size();
     if (shouldFetchChannels() && channelCount > 0) {
         _pendingRequests = channelCount;
         fetchFromChannels();
@@ -141,47 +143,49 @@ void ProxyAutobot::finalizeFetchAndTest() {
 }
 
 void ProxyAutobot::fetchFromChannels() {
-    for (const auto &channelUsername : Constants::kProxyChannels) {
-        _session->api().request(MTPcontacts_ResolveUsername(
-            MTP_flags(0),
-            MTP_string(channelUsername),
-            MTP_string()
-        )).done([this](const MTPcontacts_ResolvedPeer &result) {
-            const auto &data = result.c_contacts_resolvedPeer();
-            if (data.vchats().v.empty()) {
-                checkFetchFinished();
-                return;
-            }
+	const auto &channelUsernames = AhiGram::Storage::Settings::Instance()
+		.data().proxyChannels.current();
+	for (const auto &channelUsername : channelUsernames) {
+		_session->api().request(MTPcontacts_ResolveUsername(
+			MTP_flags(0),
+			MTP_string(channelUsername),
+			MTP_string()
+		)).done([=](const MTPcontacts_ResolvedPeer &result) {
+			const auto &data = result.c_contacts_resolvedPeer();
+			if (data.vchats().v.empty()) {
+				checkFetchFinished();
+				return;
+			}
 
-            data.vchats().v.front().match([&](const MTPDchannel &channel) {
-                if (!channel.vaccess_hash()) {
-                    checkFetchFinished();
-                    return;
-                }
-                const auto inputPeer = MTP_inputPeerChannel(channel.vid(), *channel.vaccess_hash());
-                _session->api().request(MTPmessages_GetHistory(
-                    inputPeer,
-                    MTP_int(0), MTP_int(0), MTP_int(0),
-                    MTP_int(Constants::kHistoryLimit),
-                    MTP_int(0), MTP_int(0), MTP_long(0)
-                )).done([this](const MTPmessages_Messages &res) {
-                    res.match([&](const MTPDmessages_messagesNotModified &) {
-                    }, [&](const auto &data) {
-                        for (const auto &message : data.vmessages().v) {
-                            parseSingleMessage(message, _fetchedCandidates);
-                        }
-                    });
-                    checkFetchFinished();
-                }).fail([this](const MTP::Error &error) {
-                    checkFetchFinished();
-                }).send();
-            }, [this](const auto &) {
-                checkFetchFinished();
-            });
-        }).fail([this](const MTP::Error &error) {
-            checkFetchFinished();
-        }).send();
-    }
+			data.vchats().v.front().match([&](const MTPDchannel &channel) {
+				if (!channel.vaccess_hash()) {
+					checkFetchFinished();
+					return;
+				}
+				const auto inputPeer = MTP_inputPeerChannel(channel.vid(), *channel.vaccess_hash());
+				_session->api().request(MTPmessages_GetHistory(
+					inputPeer,
+					MTP_int(0), MTP_int(0), MTP_int(0),
+					MTP_int(Constants::kHistoryLimit),
+					MTP_int(0), MTP_int(0), MTP_long(0)
+				)).done([=](const MTPmessages_Messages &res) {
+					res.match([&](const MTPDmessages_messagesNotModified &) {
+					}, [&](const auto &data) {
+						for (const auto &message : data.vmessages().v) {
+							parseSingleMessage(message, _fetchedCandidates);
+						}
+					});
+					checkFetchFinished();
+				}).fail([=](const MTP::Error &error) {
+					checkFetchFinished();
+				}).send();
+			}, [=](const auto &) {
+				checkFetchFinished();
+			});
+		}).fail([=](const MTP::Error &error) {
+			checkFetchFinished();
+		}).send();
+	}
 }
 
 void ProxyAutobot::checkFetchFinished() {

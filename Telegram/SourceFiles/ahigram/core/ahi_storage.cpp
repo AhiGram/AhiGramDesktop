@@ -19,7 +19,12 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 namespace AhiGram {
 
 SettingsData::SettingsData()
-: ahiBypass(Utils::IsRestrictedRegion()) {
+: ahiBypass(Utils::IsRestrictedRegion())
+, proxyChannels(QStringList{
+    u"ProxyFree_Ru"_q,
+    u"AhiProxy"_q,
+    u"telemtfreeproxy"_q,
+}) {
 }
 
 QVariantMap SettingsData::toMap() const {
@@ -35,6 +40,7 @@ QVariantMap SettingsData::toMap() const {
         { u"invisibleModeEnabled"_q, invisibleModeEnabled.current() },
         { u"invisibleModeShowInMenu"_q, invisibleModeShowInMenu.current() },
         { u"welcomeShown"_q, welcomeShown.current() },
+        { u"proxyChannels"_q, proxyChannels.current() },
     };
 }
 
@@ -69,6 +75,9 @@ void SettingsData::fillFromMap(const QVariantMap &map) {
     welcomeShown.force_assign(map.value(
         u"welcomeShown"_q,
         welcomeShown.current()).toBool());
+    proxyChannels.force_assign(map.value(
+        u"proxyChannels"_q,
+        proxyChannels.current()).toStringList());
 }
 
 namespace Storage {
@@ -110,6 +119,7 @@ Settings::Settings() {
     _data.invisibleModeEnabled.changes() | rpl::on_next(markDirty, _lifetime);
     _data.invisibleModeShowInMenu.changes() | rpl::on_next(markDirty, _lifetime);
     _data.welcomeShown.changes() | rpl::on_next(markDirty, _lifetime);
+    _data.proxyChannels.changes() | rpl::on_next(markDirty, _lifetime);
 }
 
 Settings::~Settings() {

@@ -9,7 +9,6 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #pragma once
 
 #include <QtCore/QString>
-#include <vector>
 
 namespace AhiGram::Networking {
 
@@ -26,15 +25,6 @@ struct ProxyCandidate {
 };
 
 namespace Constants {
-
-inline const std::vector<QString> kProxyChannels = {
-    u"ProxyMTProto"_q,
-    u"ProxyFree_Ru"_q,
-    u"mtpro_xyz"_q,
-    u"MTPproxy"_q,
-    u"toproxylab"_q,
-    u"free_mtproto_proxy"_q,
-};
 
 inline const QString kRemoteProxyListUrl = u"https://ahigram.online/proxy/list"_q;
 inline const QString kIpCheckUrl = u"http://ip-api.com/line/?fields=countryCode"_q;

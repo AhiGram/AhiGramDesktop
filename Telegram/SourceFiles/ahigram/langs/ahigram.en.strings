@@ -12,9 +12,11 @@
 "ahigram_bypass_title" = "Network";
 "ahigram_auto_proxy" = "Auto Proxy";
 "ahigram_bypass_slowdown_title" = "Automatic proxy (beta)";
+"ahigram_proxy_channels_title" = "Proxy parsing channels";
+"ahigram_proxy_channels_add" = "Add channel";
 
 // Chat Section
-"ahigram_delmsg_section" = "Chat";
+"ahigram_delmsg_section" = "Chats";
 "ahigram_deleted_messages_subsection" = "Deleted messages";
 "ahigram_delete_message" = "deleted";
 "ahigram_save_del_message" = "Save deleted locally";
