@@ -12,8 +12,10 @@
 "ahigram_bypass_title" = "Network";
 "ahigram_auto_proxy" = "Auto Proxy";
 "ahigram_bypass_slowdown_title" = "Automatic proxy (beta)";
+"ahigram_bypass_description" = "This feature loads working MTProto Proxy servers from AhiGram servers and automatically connects to them.";
 "ahigram_proxy_channels_title" = "Proxy parsing channels";
 "ahigram_proxy_channels_add" = "Add channel";
+"ahigram_proxy_channels_description" = "You can select channels to search for MTProto Proxy if the AhiGram server is unavailable or not needed.";
 
 // Chat Section
 "ahigram_delmsg_section" = "Chats";
@@ -22,12 +24,13 @@
 "ahigram_save_del_message" = "Save deleted locally";
 "ahigram_load_del_message" = "Restore deleted on startup";
 "ahigram_deleted_opacity_title" = "Deleted dim level";
-"ahigram_clear_deleted_messages" = "Clear deleted messages";
+"ahigram_clear_deleted_messages" = "Clear messages";
 "ahigram_clear_deleted_messages_confirm" = "Clear the deleted messages database completely?";
 
 // Privacy Section
 "ahigram_privacy_section" = "Privacy";
 "ahigram_invisible_mode_sections" = "Invisible Mode";
+"ahigram_invisible_mode_description" = "This feature hides your activity from others. No one can see you read messages, watch stories, or be online.";
 "ahigram_invisible_mode_title" = "Invisible Mode";
 "ahigram_invisible_mode_show_in_menu" = "Show in menu";
 

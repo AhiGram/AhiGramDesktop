@@ -159,7 +159,7 @@ void AhiNetworkSettings::setupContent() {
 	}, content->lifetime());
 
 	Ui::AddSkip(content);
-	Ui::AddDivider(content);
+	Ui::AddDividerText(content, AhiGram::trReactive(u"ahigram_bypass_description"_q));
 	Ui::AddSkip(content);
 
 	Ui::AddSubsectionTitle(content, AhiGram::trReactive(u"ahigram_proxy_channels_title"_q));
@@ -292,6 +292,9 @@ void AhiNetworkSettings::setupContent() {
 		_controller->show(
 			Box<PeerListBox>(std::move(controller), std::move(initBox)));
 	});
+
+	Ui::AddSkip(content);
+	Ui::AddDividerText(content, AhiGram::trReactive(u"ahigram_proxy_channels_description"_q));
 
 	Ui::ResizeFitChild(this, content);
 }

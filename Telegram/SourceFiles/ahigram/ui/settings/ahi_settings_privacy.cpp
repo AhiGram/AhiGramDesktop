@@ -53,6 +53,9 @@ void AhiPrivacySettings::setupContent() {
 		settings.invisibleModeEnabled.force_assign(toggled);
 	}, content->lifetime());
 
+	Ui::AddSkip(content);
+	Ui::AddDividerText(content, AhiGram::trReactive(u"ahigram_invisible_mode_description"_q));
+
 	const auto showInMenuButton = content->add(
 		object_ptr<Ui::SettingsButton>(
 			content,

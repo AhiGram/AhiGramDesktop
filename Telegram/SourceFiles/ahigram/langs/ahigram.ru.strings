@@ -12,8 +12,10 @@
 "ahigram_bypass_title" = "Сеть";
 "ahigram_auto_proxy" = "Авто Прокси";
 "ahigram_bypass_slowdown_title" = "Автоматический прокси (бета)";
+"ahigram_bypass_description" = "Данная функция подгружает с серверов AhiGram рабочие прокси MTProto Proxy и автоматически подключает их.";
 "ahigram_proxy_channels_title" = "Каналы для парсинга прокси";
 "ahigram_proxy_channels_add" = "Добавить канал";
+"ahigram_proxy_channels_description" = "Вы можете выбрать каналы в которых искать MTProto Proxy, если AhiGram сервер будет недоступен или не нужен в использовании.";
 
 // Chat Section
 "ahigram_delmsg_section" = "Чаты";
@@ -22,12 +24,13 @@
 "ahigram_save_del_message" = "Сохранять удалённые сообщения";
 "ahigram_load_del_message" = "Подгружать удалённые сообщения";
 "ahigram_deleted_opacity_title" = "Затемнение удалённых";
-"ahigram_clear_deleted_messages" = "Почистить Сообщения";
+"ahigram_clear_deleted_messages" = "Почистить сообщения";
 "ahigram_clear_deleted_messages_confirm" = "Очистить всю базу данных удалённых сообщений?";
 
 // Privacy Section
 "ahigram_privacy_section" = "Приватность";
-"ahigram_invisible_mode_sections" = "Управление Невидимкой";
+"ahigram_invisible_mode_sections" = "Управление невидимкой";
+"ahigram_invisible_mode_description" = "Данная функция скрывает вашу активность от других людей. Никто не видит, как вы читаете сообщения, смотрите истории или находитесь в сети.";
 "ahigram_invisible_mode_title" = "Режим невидимки";
 "ahigram_invisible_mode_show_in_menu" = "Показать в меню";
 
