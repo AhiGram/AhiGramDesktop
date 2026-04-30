@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=AhiGram Desktop
-Comment=Fork Telegram
+Comment=The best unofficial Telegram client 
 TryExec=AhiGram
 Exec=AhiGram -- %U
 Icon=com.ahigram.desktop
