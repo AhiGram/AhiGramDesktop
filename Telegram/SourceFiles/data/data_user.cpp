@@ -594,6 +594,10 @@ bool UserData::isVerified() const {
 	return flags() & UserDataFlag::Verified;
 }
 
+bool UserData::isAhiVerified() const {
+	return flags() & UserDataFlag::AhiVerified;
+}
+
 bool UserData::isScam() const {
 	return flags() & UserDataFlag::Scam;
 }

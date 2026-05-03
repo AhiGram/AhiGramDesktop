@@ -22,6 +22,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "main/main_session.h"
 #include "styles/style_info.h"
 
+// AhiGram Include
+#include "styles/style_ahi_base.h"
+
 namespace Info::Profile {
 namespace {
 
@@ -83,11 +86,13 @@ void Badge::setContent(Content content) {
 	_view.create(_parent);
 	_view->setAccessibleName([&] {
 		switch (_content.badge) {
-		case BadgeType::Verified:
-			return tr::lng_sr_verified_badge(tr::now);
-		case BadgeType::BotVerified:
-			return tr::lng_sr_bot_verified_badge(tr::now);
-		case BadgeType::Premium:
+	case BadgeType::Verified:
+		return tr::lng_sr_verified_badge(tr::now);
+	case BadgeType::AhiVerified:
+		return QString("AhiGram Verified");
+	case BadgeType::BotVerified:
+		return tr::lng_sr_bot_verified_badge(tr::now);
+	case BadgeType::Premium:
 			if (_content.emojiStatusId) {
 				return tr::lng_profile_bot_emoji_status_access(tr::now);
 			}
@@ -104,6 +109,7 @@ void Badge::setContent(Content content) {
 	_view->show();
 	switch (_content.badge) {
 	case BadgeType::Verified:
+	case BadgeType::AhiVerified:
 	case BadgeType::BotVerified:
 	case BadgeType::Premium: {
 		const auto id = _content.emojiStatusId;
@@ -114,6 +120,8 @@ void Badge::setContent(Content content) {
 		const auto &style = st();
 		const auto icon = (_content.badge == BadgeType::Verified)
 			? &style.verified
+			: (_content.badge == BadgeType::AhiVerified)
+			? &st::infoAhiVerifiedStar
 			: id
 			? nullptr
 			: &style.premium;

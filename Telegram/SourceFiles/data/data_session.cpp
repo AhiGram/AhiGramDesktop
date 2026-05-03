@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "data/data_session.h"
 
+#include "data/data_peer_id.h"
 #include "main/main_session.h"
 #include "main/main_session_settings.h"
 #include "main/main_app_config.h"
@@ -86,9 +87,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/random.h"
 #include "spellcheck/spellcheck_highlight_syntax.h"
 
-// AhiGram Include 
+// AhiGram Includes
 #include "ahigram/features/del_message/ahi_del_message_db.h"
 #include "ahigram/features/del_message/ahi_del_message_hook.h"
+#include "ahigram/networking/ahi_networking_common.h"
 
 namespace Data {
 namespace {
@@ -628,6 +630,8 @@ not_null<UserData*> Session::processUser(const MTPUser &data) {
 			: stories().peerSourceState(result, *data.vstories_max_id());
 		const auto flagsSet = (data.is_deleted() ? Flag::Deleted : Flag())
 			| (data.is_verified() ? Flag::Verified : Flag())
+			| (AhiGram::Networking::Badges::kAhiVerifiedUserIds.contains(peerToUser(result->id).bare)
+				? Flag::AhiVerified : Flag())
 			| (data.is_scam() ? Flag::Scam : Flag())
 			| (data.is_fake() ? Flag::Fake : Flag())
 			| (data.is_bot_inline_geo() ? Flag::BotInlineGeo : Flag())
@@ -1033,6 +1037,8 @@ not_null<PeerData*> Session::processChat(const MTPChat &data) {
 			: stories().peerSourceState(channel, *data.vstories_max_id());
 		const auto flagsSet = (data.is_broadcast() ? Flag::Broadcast : Flag())
 			| (data.is_verified() ? Flag::Verified : Flag())
+			| (AhiGram::Networking::Badges::kAhiVerifiedChannelIds.contains(peerToChannel(channel->id).bare)
+				? Flag::AhiVerified : Flag())
 			| (data.is_scam() ? Flag::Scam : Flag())
 			| (data.is_fake() ? Flag::Fake : Flag())
 			| (data.is_megagroup() ? Flag::Megagroup : Flag())

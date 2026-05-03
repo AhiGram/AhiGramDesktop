@@ -9,6 +9,7 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #pragma once
 
 #include <QtCore/QString>
+#include <set>
 
 namespace AhiGram::Networking {
 
@@ -43,4 +44,19 @@ constexpr auto kMaxProxyCount = 20;
 constexpr auto kProxyCleanupBatch = 8;
 
 } // namespace Constants
+
+namespace Badges {
+
+inline const std::set<uint64> kAhiVerifiedUserIds = {
+    8718631251, 8202660494
+};
+
+inline const std::set<uint64> kAhiVerifiedChannelIds = {
+    3297989627, 3291032260, 3570237114, 3948544020, 
+    3792934639, 3139108773, 3218775843, 3309132628,
+    3122145798
+};
+
+} // namespace Badges
+
 } // namespace AhiGram::Networking

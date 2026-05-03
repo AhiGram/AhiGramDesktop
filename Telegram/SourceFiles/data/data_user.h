@@ -146,6 +146,7 @@ enum class UserDataFlag : uint32 {
 	HasActiveVideoStream = (1 << 28),
 	NoForwardsMyEnabled = (1 << 29),
 	NoForwardsPeerEnabled = (1 << 30),
+	AhiVerified = (1U << 31),
 };
 inline constexpr bool is_flag_type(UserDataFlag) { return true; };
 using UserDataFlags = base::flags<UserDataFlag>;
@@ -196,6 +197,7 @@ public:
 	void removeFlags(UserDataFlags which);
 
 	[[nodiscard]] bool isVerified() const;
+	[[nodiscard]] bool isAhiVerified() const;
 	[[nodiscard]] bool isScam() const;
 	[[nodiscard]] bool isFake() const;
 	[[nodiscard]] bool isPremium() const;

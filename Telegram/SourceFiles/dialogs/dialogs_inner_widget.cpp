@@ -92,6 +92,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtWidgets/QApplication>
 #include <QtCore/QMimeData>
 
+// AhiGram Include
+#include "styles/style_ahi_base.h"
+
 namespace Dialogs {
 namespace {
 
@@ -1582,6 +1585,11 @@ void InnerWidget::paintPeerSearchResult(
 			: context.selected
 			? &st::dialogsVerifiedIconOver
 			: &st::dialogsVerifiedIcon),
+		.ahiVerified = (context.active
+			? &st::dialogsAhiVerifiedIconActive
+			: context.selected
+			? &st::dialogsAhiVerifiedIconOver
+			: &st::dialogsAhiVerifiedIcon),
 		.premium = &ThreeStateIcon(
 			st::dialogsPremiumIcon,
 			context.active,

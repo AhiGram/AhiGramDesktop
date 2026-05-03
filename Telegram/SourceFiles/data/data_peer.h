@@ -261,6 +261,7 @@ public:
 	[[nodiscard]] bool isBot() const;
 	[[nodiscard]] bool isSelf() const;
 	[[nodiscard]] bool isVerified() const;
+	[[nodiscard]] bool isAhiVerified() const;
 	[[nodiscard]] bool isPremium() const;
 	[[nodiscard]] bool isScam() const;
 	[[nodiscard]] bool isFake() const;

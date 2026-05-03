@@ -86,6 +86,7 @@ enum class ChannelDataFlag : uint64 {
 	HasStarsPerMessage = (1ULL << 43),
 	StarsPerMessageKnown = (1ULL << 44),
 	HasActiveVideoStream = (1ULL << 45),
+	AhiVerified = (1ULL << 46),
 };
 inline constexpr bool is_flag_type(ChannelDataFlag) { return true; };
 using ChannelDataFlags = base::flags<ChannelDataFlag>;
@@ -267,6 +268,9 @@ public:
 	}
 	[[nodiscard]] bool isVerified() const {
 		return flags() & Flag::Verified;
+	}
+	[[nodiscard]] bool isAhiVerified() const {
+		return flags() & Flag::AhiVerified;
 	}
 	[[nodiscard]] bool isScam() const {
 		return flags() & Flag::Scam;

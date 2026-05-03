@@ -9,3 +9,23 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 using "ui/basic.style";
 
 ahiDialogsTopBarLeftPadding: 18px;
+
+dialogsAhiVerifiedIcon: icon {
+	{ "ahigram/dialogs_ahi_verified_star", dialogsVerifiedIconBg, point(0px, -1px) },
+	{ "ahigram/dialogs_ahi_verified_check", dialogsVerifiedIconFg, point(0px, -1px) },
+};
+
+dialogsAhiVerifiedIconOver: icon {
+	{ "ahigram/dialogs_ahi_verified_star", dialogsVerifiedIconBgOver, point(0px, -1px) },
+	{ "ahigram/dialogs_ahi_verified_check", dialogsVerifiedIconFgOver, point(0px, -1px) },
+};
+
+dialogsAhiVerifiedIconActive: icon {
+	{ "ahigram/dialogs_ahi_verified_star", dialogsVerifiedIconBgActive, point(0px, -1px) },
+	{ "ahigram/dialogs_ahi_verified_check", dialogsVerifiedIconFgActive, point(0px, -1px) },
+};
+
+infoAhiVerifiedStar: icon {
+	{ "ahigram/dialogs_ahi_verified_star", profileVerifiedCheckBg },
+	{ "ahigram/dialogs_ahi_verified_check", profileVerifiedCheckFg },
+};

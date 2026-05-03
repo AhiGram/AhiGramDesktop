@@ -56,6 +56,7 @@ public:
 		int nameWidth = 0;
 		int outerWidth = 0;
 		const style::icon *verified = nullptr;
+		const style::icon *ahiVerified = nullptr;
 		const style::icon *premium = nullptr;
 		const style::color *scam = nullptr;
 		const style::color *direct = nullptr;
@@ -87,6 +88,7 @@ private:
 
 	int drawTextBadge(Painter &p, const Descriptor &descriptor);
 	int drawVerifyCheck(Painter &p, const Descriptor &descriptor);
+	int drawAhiVerifyCheck(Painter &p, const Descriptor &descriptor);
 	int drawPremiumEmojiStatus(Painter &p, const Descriptor &descriptor);
 	int drawPremiumStar(Painter &p, const Descriptor &descriptor);
 

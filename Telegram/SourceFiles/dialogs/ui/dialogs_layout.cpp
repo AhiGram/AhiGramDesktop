@@ -50,6 +50,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_widgets.h"
 #include "styles/style_window.h"
 
+// AhiGram Include
+#include "styles/style_ahi_base.h"
+
 namespace Dialogs::Ui {
 
 const char kOptionDialogsMuteIcon[] = "dialogs-mute-icon";
@@ -805,6 +808,11 @@ void PaintRow(
 				: context.selected
 				? &st::dialogsVerifiedIconOver
 				: &st::dialogsVerifiedIcon),
+			.ahiVerified = (context.active
+				? &st::dialogsAhiVerifiedIconActive
+				: context.selected
+				? &st::dialogsAhiVerifiedIconOver
+				: &st::dialogsAhiVerifiedIcon),
 			.premium = &ThreeStateIcon(
 				st::dialogsPremiumIcon,
 				context.active,

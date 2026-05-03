@@ -72,6 +72,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include <QtGui/QWindow>
 
+// AhiGram Include
+#include "styles/style_ahi_base.h"
+
 namespace HistoryView {
 namespace {
 
@@ -665,6 +668,7 @@ void TopBarWidget::paintTopBar(Painter &p) {
 			.nameWidth = _title.maxWidth(),
 			.outerWidth = width(),
 			.verified = &st::dialogsVerifiedIcon,
+			.ahiVerified = &st::dialogsAhiVerifiedIcon,
 			.premium = &st::dialogsPremiumIcon.icon,
 			.scam = &st::attentionButtonFg,
 			.direct = &st::windowSubTextFg,

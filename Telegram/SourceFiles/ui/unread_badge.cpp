@@ -155,6 +155,7 @@ int PeerBadge::drawGetWidth(Painter &p, Descriptor &&descriptor) {
 		return drawTextBadge(p, descriptor);
 	}
 	const auto verifyCheck = descriptor.verified && peer->isVerified();
+	const auto ahiVerifyCheck = descriptor.ahiVerified && peer->isAhiVerified();
 	const auto premiumMark = descriptor.premium
 		&& peer->session().premiumBadgesShown();
 	const auto emojiStatus = premiumMark
@@ -163,30 +164,42 @@ int PeerBadge::drawGetWidth(Painter &p, Descriptor &&descriptor) {
 	const auto premiumStar = premiumMark
 		&& !emojiStatus
 		&& peer->isPremium();
-
+	
+	const auto paintAhiVerify = ahiVerifyCheck
+		&& (descriptor.prioritizeVerification
+			|| descriptor.bothVerifyAndStatus
+			|| !emojiStatus);
 	const auto paintVerify = verifyCheck
+		&& !paintAhiVerify
 		&& (descriptor.prioritizeVerification
 			|| descriptor.bothVerifyAndStatus
 			|| !emojiStatus);
 	const auto paintEmoji = emojiStatus
-		&& (!paintVerify || descriptor.bothVerifyAndStatus);
-	const auto paintStar = premiumStar && !paintVerify;
+		&& ((!paintAhiVerify && !paintVerify) || descriptor.bothVerifyAndStatus);
+	const auto paintStar = premiumStar && !paintAhiVerify && !paintVerify;
 
 	auto result = 0;
 	if (paintEmoji) {
 		auto &rectForName = descriptor.rectForName;
-		const auto verifyWidth = descriptor.verified->width();
-		if (paintVerify) {
+		const auto verifyWidth = paintAhiVerify
+			? descriptor.ahiVerified->width()
+			: paintVerify
+			? descriptor.verified->width()
+			: 0;
+		if (paintAhiVerify || paintVerify) {
 			rectForName.setWidth(rectForName.width() - verifyWidth);
 		}
 		result += drawPremiumEmojiStatus(p, descriptor);
-		if (!paintVerify) {
+		if (!paintAhiVerify && !paintVerify) {
 			return result;
 		}
 		rectForName.setWidth(rectForName.width() + verifyWidth);
 		descriptor.nameWidth += result;
 	}
-	if (paintVerify) {
+	if (paintAhiVerify) {
+		result += drawAhiVerifyCheck(p, descriptor);
+		return result;
+	} else if (paintVerify) {
 		result += drawVerifyCheck(p, descriptor);
 		return result;
 	} else if (paintStar) {
@@ -238,6 +251,18 @@ int PeerBadge::drawVerifyCheck(Painter &p, const Descriptor &descriptor) {
 	const auto rectForName = descriptor.rectForName;
 	const auto nameWidth = descriptor.nameWidth;
 	descriptor.verified->paint(
+		p,
+		rectForName.x() + qMin(nameWidth, rectForName.width() - iconw),
+		rectForName.y(),
+		descriptor.outerWidth);
+	return iconw;
+}
+
+int PeerBadge::drawAhiVerifyCheck(Painter &p, const Descriptor &descriptor) {
+	const auto iconw = descriptor.ahiVerified->width();
+	const auto rectForName = descriptor.rectForName;
+	const auto nameWidth = descriptor.nameWidth;
+	descriptor.ahiVerified->paint(
 		p,
 		rectForName.x() + qMin(nameWidth, rectForName.width() - iconw),
 		rectForName.y(),

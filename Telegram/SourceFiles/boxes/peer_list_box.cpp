@@ -39,6 +39,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <xxhash.h> // XXH64.
 #include <QtWidgets/QApplication>
 
+// AhiGram Include
+#include "styles/style_ahi_base.h"
+
 [[nodiscard]] PeerListRowId UniqueRowIdFromString(const QString &d) {
 	return XXH64(d.data(), d.size() * sizeof(ushort), 0);
 }
@@ -825,6 +828,9 @@ int PeerListRow::paintNameIconGetWidth(
 		.verified = &(selected
 			? st::dialogsVerifiedIconOver
 			: st::dialogsVerifiedIcon),
+		.ahiVerified = &(selected
+			? st::dialogsAhiVerifiedIconOver
+			: st::dialogsAhiVerifiedIcon),
 		.premium = &(selected
 			? st::dialogsPremiumIcon.over
 			: st::dialogsPremiumIcon.icon),

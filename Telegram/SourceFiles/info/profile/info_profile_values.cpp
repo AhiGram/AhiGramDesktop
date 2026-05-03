@@ -688,7 +688,7 @@ rpl::producer<BadgeType> BadgeValueFromFlags(Peer peer) {
 	return rpl::combine(
 		Data::PeerFlagsValue(
 			peer,
-			Flag::Verified | Flag::Scam | Flag::Fake),
+			Flag::Verified | Flag::Scam | Flag::Fake | Flag::AhiVerified),
 		Data::PeerPremiumValue(peer)
 	) | rpl::map([=](base::flags<Flag> value, bool premium) {
 		return (value & Flag::Scam)
@@ -697,6 +697,8 @@ rpl::producer<BadgeType> BadgeValueFromFlags(Peer peer) {
 			? BadgeType::Fake
 			: peer->isMonoforum()
 			? BadgeType::Direct
+			: (value & Flag::AhiVerified)
+			? BadgeType::AhiVerified
 			: (value & Flag::Verified)
 			? BadgeType::Verified
 			: premium

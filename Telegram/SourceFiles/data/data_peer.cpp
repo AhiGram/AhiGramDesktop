@@ -1534,6 +1534,15 @@ bool PeerData::isVerified() const {
 	return false;
 }
 
+bool PeerData::isAhiVerified() const {
+	if (const auto user = asUser()) {
+		return user->isAhiVerified();
+	} else if (const auto channel = asChannel()) {
+		return channel->isAhiVerified();
+	}
+	return false;
+}
+
 bool PeerData::isPremium() const {
 	if (const auto user = asUser()) {
 		return user->isPremium();
