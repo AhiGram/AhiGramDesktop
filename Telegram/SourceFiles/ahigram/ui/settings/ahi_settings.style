@@ -22,7 +22,7 @@ ahiSettingsButtonNoIcon: SettingsButton(ahiSettingsButton) {
 ahiMenuIconSettings: icon {{ "ahigram/menu_settings", menuIconColor }};
 ahiInvisibleSettings: icon {{ "ahigram/invisible_settings", menuIconColor }};
 
-ahiIconNetwork: icon {{ "settings/arrows", settingsIconFg }};
-ahiIconChat: icon {{ "menu/chat_bubble", settingsIconFg }};
-ahiIconPrivacy: icon {{ "ahigram/invisible_settings", settingsIconFg }};
-ahiIconOther: icon {{ "menu/passcode_winhello", settingsIconFg }};
+ahiIconNetwork: icon {{ "settings/arrows", menuIconColor }};
+ahiIconChat: icon {{ "menu/chat_bubble", menuIconColor }};
+ahiIconPrivacy: icon {{ "ahigram/invisible_settings", menuIconColor }};
+ahiIconOther: icon {{ "menu/passcode_winhello", menuIconColor }};
