@@ -92,6 +92,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "storage/file_upload.h"
 #include "storage/storage_account.h"
 
+// AhiGram Include
+#include "ahigram/features/invisible_mode/ahi_invisible_mode.h"
+
 namespace {
 
 // Save draft to the cloud with 1 sec extra delay.
@@ -1339,6 +1342,9 @@ void ApiWrap::migrateFail(not_null<PeerData*> peer, const QString &error) {
 
 void ApiWrap::markContentsRead(
 		const base::flat_set<not_null<HistoryItem*>> &items) {
+	if (AhiGram::InvisibleMode::IsEnabled()) {
+		return;
+	}
 	auto markedIds = QVector<MTPint>();
 	auto channelMarkedIds = base::flat_map<
 		not_null<ChannelData*>,
@@ -1370,6 +1376,9 @@ void ApiWrap::markContentsRead(
 }
 
 void ApiWrap::markContentsRead(not_null<HistoryItem*> item) {
+	if (AhiGram::InvisibleMode::IsEnabled()) {
+		return;
+	}
 	if (!item->markContentsRead(true) || !item->isRegular()) {
 		return;
 	}
