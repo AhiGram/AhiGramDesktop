@@ -30,7 +30,7 @@ namespace Constants {
 inline const QString kApiDomain = u"https://ahigram.online"_q;
 
 constexpr auto kIpCheckTimeout = 5000;
-constexpr auto kHistoryLimit = 20;
+constexpr auto kChannelHistoryLimit = 8;
 constexpr auto kFailedPing = 9999;
 constexpr auto kPingTimeoutMs = 4000;
 constexpr auto kFailoverCheckIntervalMs = 30000;

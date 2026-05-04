@@ -38,6 +38,7 @@ public:
     void refresh();
 
 private:
+    void validateExistingProxies();
     void fetchRemoteList();
     void fetchFromChannels();
     void afterRemoteFetchFinished();
@@ -62,6 +63,9 @@ private:
     int _pendingRequests = 0;
     std::vector<ProxyCandidate> _fetchedCandidates;
     crl::time _lastApplyTime = 0;
+
+    int _targetProxyCount = 0;
+    int _existingWorkingCount = 0;
 
     std::unique_ptr<base::Timer> _failoverTimer;
     rpl::lifetime _lifetime;

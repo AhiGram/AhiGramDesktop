@@ -71,6 +71,80 @@ ProxyAutobot::ProxyAutobot(not_null<Main::Session*> session)
 
 ProxyAutobot::~ProxyAutobot() = default;
 
+void ProxyAutobot::validateExistingProxies() {
+    auto &proxySettings = Core::App().settings().proxy();
+    auto &list = proxySettings.list();
+
+    if (list.empty()) {
+        AHI_LOG(("AhiGram: No existing proxies, fetching new ones..."));
+        _existingWorkingCount = 0;
+        _targetProxyCount = Constants::kMaxProxyCount;
+        fetchRemoteList();
+        return;
+    }
+
+    std::vector<ProxyCandidate> existing;
+    for (const auto &proxy : list) {
+        if (proxy.type == MTP::ProxyData::Type::Mtproto) {
+            ProxyCandidate c;
+            c.host = proxy.host;
+            c.port = proxy.port;
+            c.secret = proxy.password;
+            existing.push_back(c);
+        }
+    }
+
+    if (existing.empty()) {
+        AHI_LOG(("AhiGram: No MTProto proxies in list, fetching new ones..."));
+        _existingWorkingCount = 0;
+        _targetProxyCount = Constants::kMaxProxyCount;
+        fetchRemoteList();
+        return;
+    }
+
+    AHI_LOG(("AhiGram: Testing %1 existing proxies...").arg(existing.size()));
+
+    struct ValidationResults {
+        std::vector<ProxyCandidate> working;
+        std::vector<ProxyCandidate> failed;
+    };
+    auto results = std::make_shared<ValidationResults>();
+
+    ProxyTester::Test(&_session->account().mtp(), std::move(existing))
+    | rpl::on_next_done([=](const ProxyCandidate &res) {
+        if (res.ping >= 0 && res.ping < Constants::kFailedPing) {
+            results->working.push_back(res);
+        } else {
+            results->failed.push_back(res);
+        }
+    }, [=] {
+        AHI_LOG(("AhiGram: Validation finished. Working: %1, Failed: %2")
+            .arg(results->working.size())
+            .arg(results->failed.size()));
+
+        auto &proxySettings = Core::App().settings().proxy();
+        auto &list = proxySettings.list();
+        const auto &current = proxySettings.selected();
+
+        for (const auto &failed : results->failed) {
+            list.erase(std::remove_if(list.begin(), list.end(), [&](const MTP::ProxyData &p) {
+                const bool isCurrentProxy = (p.host == current.host && p.port == current.port);
+                const bool isFailed = (p.host == failed.host && p.port == failed.port);
+                return isFailed && !isCurrentProxy;
+            }), list.end());
+        }
+
+        Core::App().saveSettingsDelayed();
+
+        _existingWorkingCount = static_cast<int>(results->working.size());
+        _targetProxyCount = Constants::kMaxProxyCount - _existingWorkingCount;
+
+        AHI_LOG(("AhiGram: Need to fetch %1 more proxies").arg(_targetProxyCount));
+
+        fetchRemoteList();
+    }, _lifetime);
+}
+
 void ProxyAutobot::refresh() {
     if (_isRefreshing) return;
     if (!AhiGram::Storage::Settings::Instance().data().ahiBypass.current()) {
@@ -81,7 +155,7 @@ void ProxyAutobot::refresh() {
     _isRefreshing = true;
     _fetchedCandidates.clear();
 
-    fetchRemoteList();
+    validateExistingProxies();
 }
 
 void ProxyAutobot::fetchRemoteList() {
@@ -103,15 +177,23 @@ void ProxyAutobot::fetchRemoteList() {
 }
 
 void ProxyAutobot::afterRemoteFetchFinished() {
-    const auto &channelUsernames = AhiGram::Storage::Settings::Instance()
-        .data().proxyChannels.current();
-    const auto channelCount = channelUsernames.size();
-    if (shouldFetchChannels() && channelCount > 0) {
-        _pendingRequests = channelCount;
-        fetchFromChannels();
-    } else {
-        finalizeFetchAndTest();
+    const int needed = _targetProxyCount - static_cast<int>(_fetchedCandidates.size());
+    
+    AHI_LOG(("AhiGram: After remote fetch: have %1, need %2 more")
+        .arg(_fetchedCandidates.size())
+        .arg(needed > 0 ? needed : 0));
+    
+    if (needed > 0 && shouldFetchChannels()) {
+        const auto &channelUsernames = AhiGram::Storage::Settings::Instance()
+            .data().proxyChannels.current();
+        if (!channelUsernames.empty()) {
+            _pendingRequests = static_cast<int>(channelUsernames.size());
+            fetchFromChannels();
+            return;
+        }
     }
+    
+    finalizeFetchAndTest();
 }
 
 bool ProxyAutobot::shouldFetchChannels() const {
@@ -166,7 +248,7 @@ void ProxyAutobot::fetchFromChannels() {
 				_session->api().request(MTPmessages_GetHistory(
 					inputPeer,
 					MTP_int(0), MTP_int(0), MTP_int(0),
-					MTP_int(Constants::kHistoryLimit),
+					MTP_int(Constants::kChannelHistoryLimit),
 					MTP_int(0), MTP_int(0), MTP_long(0)
 				)).done([=](const MTPmessages_Messages &res) {
 					res.match([&](const MTPDmessages_messagesNotModified &) {
@@ -237,8 +319,8 @@ void ProxyAutobot::startTesting(std::vector<ProxyCandidate> &&candidates) {
             const auto state = _session->account().mtp().dcstate(0);
             const bool currentBroken = (state != MTP::ConnectedState);
 
-            if ((!local->appliedFirst || currentBroken) && res.ping < 1000) {
-                AHI_LOG(("AhiGram: Fast apply proxy: %1 (ping: %2)").arg(res.host).arg(res.ping));
+            if (currentBroken && !local->appliedFirst && res.ping < 1000) {
+                AHI_LOG(("AhiGram: Fast apply proxy (connection broken): %1 (ping: %2)").arg(res.host).arg(res.ping));
                 local->appliedFirst = true;
                 applyBest(res);
             }
@@ -257,13 +339,29 @@ void ProxyAutobot::startTesting(std::vector<ProxyCandidate> &&candidates) {
             });
 
             _workingCandidates = std::move(local->list);
-            _currentProxyIndex = 0;
-
-            const auto &best = _workingCandidates[0];
-            const auto &current = Core::App().settings().proxy().selected();
-
-            if (current.host != best.host || current.port != best.port) {
-                applyBest(best);
+            
+            const auto &proxySettings = Core::App().settings().proxy();
+            const auto &current = proxySettings.selected();
+            const auto state = _session->account().mtp().dcstate(0);
+            const bool currentConnected = (state == MTP::ConnectedState);
+            
+            bool currentProxyInList = false;
+            int currentProxyIdx = -1;
+            for (int i = 0; i < static_cast<int>(_workingCandidates.size()); ++i) {
+                if (_workingCandidates[i].host == current.host && _workingCandidates[i].port == current.port) {
+                    currentProxyInList = true;
+                    currentProxyIdx = i;
+                    break;
+                }
+            }
+            
+            if (currentProxyInList && currentConnected && proxySettings.isEnabled()) {
+                AHI_LOG(("AhiGram: Current proxy is working, keeping it (ping: %1)").arg(_workingCandidates[currentProxyIdx].ping));
+                _currentProxyIndex = currentProxyIdx;
+            } else {
+                AHI_LOG(("AhiGram: Switching to best proxy: %1 (ping: %2)").arg(_workingCandidates[0].host).arg(_workingCandidates[0].ping));
+                _currentProxyIndex = 0;
+                applyBest(_workingCandidates[0]);
             }
         }
     }, _lifetime);

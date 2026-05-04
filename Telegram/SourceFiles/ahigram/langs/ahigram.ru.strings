@@ -11,7 +11,7 @@
 // Network Section
 "ahigram_bypass_title" = "Сеть";
 "ahigram_auto_proxy" = "Авто Прокси";
-"ahigram_bypass_slowdown_title" = "Автоматический прокси (бета)";
+"ahigram_bypass_slowdown_title" = "Автоматический прокси";
 "ahigram_bypass_description" = "Данная функция подгружает с серверов AhiGram рабочие прокси MTProto Proxy и автоматически подключает их.";
 "ahigram_proxy_channels_title" = "Каналы для парсинга прокси";
 "ahigram_proxy_channels_add" = "Добавить канал";

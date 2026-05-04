@@ -11,7 +11,7 @@
 // Network Section
 "ahigram_bypass_title" = "Network";
 "ahigram_auto_proxy" = "Auto Proxy";
-"ahigram_bypass_slowdown_title" = "Automatic proxy (beta)";
+"ahigram_bypass_slowdown_title" = "Automatic proxy";
 "ahigram_bypass_description" = "This feature loads working MTProto Proxy servers from AhiGram servers and automatically connects to them.";
 "ahigram_proxy_channels_title" = "Proxy parsing channels";
 "ahigram_proxy_channels_add" = "Add channel";
