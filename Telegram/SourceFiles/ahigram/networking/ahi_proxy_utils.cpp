@@ -6,7 +6,7 @@ For license and copyright information please follow this link:
 https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 */
 
-#include "ahigram/networking/ahi_proxy_utils.h"
+#include "ahi_proxy_utils.h"
 
 #include "core/application.h"
 #include "core/core_settings.h"

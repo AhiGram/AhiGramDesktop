@@ -9,7 +9,7 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #include "ahi_proxy_autobot.h"
 #include "ahi_proxy_parser.h"
 #include "ahi_proxy_tester.h"
-#include "ahigram/networking/ahi_proxy_utils.h"
+#include "ahi_proxy_utils.h"
 #include "ahigram/core/ahi_storage.h"
 
 #include "base/timer.h"
@@ -87,7 +87,7 @@ void ProxyAutobot::refresh() {
 void ProxyAutobot::fetchRemoteList() {
     _remoteLoader->cancel();
     _remoteLoader->load(
-        Constants::kRemoteProxyListUrl,
+        Constants::kApiDomain + u"/proxy/list"_q,
         [=](std::vector<ProxyCandidate> list) {
             for (auto &c : list) {
                 if (MTP::ProxyData::ValidMtprotoPassword(c.secret)) {

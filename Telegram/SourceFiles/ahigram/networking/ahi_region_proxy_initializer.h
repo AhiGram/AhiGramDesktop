@@ -8,11 +8,12 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 
 #pragma once
 
-#include "ahigram/networking/ahi_networking_common.h"
+#include "ahi_networking_common.h"
 #include <rpl/lifetime.h>
 
 namespace AhiGram::Api {
 class RemoteProxyListLoader;
+class RegionChecker;
 } // namespace AhiGram::Api
 
 namespace AhiGram::Networking {
@@ -28,6 +29,7 @@ private:
     void fetchRemoteList();
     void startTesting(std::vector<ProxyCandidate> &&candidates);
 
+    std::unique_ptr<AhiGram::Api::RegionChecker> _regionChecker;
     std::unique_ptr<AhiGram::Api::RemoteProxyListLoader> _remoteLoader;
     rpl::lifetime _lifetime;
 };

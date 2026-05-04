@@ -113,6 +113,8 @@ set(ahigram_source_files
     ahigram/library/sqlite/sqlite_orm.h
     ahigram/api/ahi_proxy_remote_api.cpp
     ahigram/api/ahi_proxy_remote_api.h
+    ahigram/api/ahi_region_api.cpp
+    ahigram/api/ahi_region_api.h
     ahigram/networking/ahi_proxy_autobot.cpp
     ahigram/networking/ahi_proxy_autobot.h
     ahigram/networking/ahi_networking_common.h

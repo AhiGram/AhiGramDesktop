@@ -9,7 +9,6 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 #pragma once
 
 #include "ahi_networking_common.h"
-
 #include "ahigram/api/ahi_proxy_remote_api.h"
 
 #include <rpl/lifetime.h>
