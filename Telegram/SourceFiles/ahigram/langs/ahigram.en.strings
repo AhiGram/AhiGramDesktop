@@ -54,6 +54,9 @@
 // Emoji/Stickers
 "ahigram_copy_emoji_id" = "Copy ID";
 
+// Copy as HTML
+"ahigram_copy_as_html" = "Copy as HTML";
+
 // About Menu
 "ahigram_about_project" = "About project";
 "ahigram_github" = "GitHub";

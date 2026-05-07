@@ -107,6 +107,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_chat_helpers.h"
 #include "styles/style_menu_icons.h"
 
+// AhiGram Includes
+#include "ahigram/ahi_lang.h"
+#include "ahigram/utils/ahi_html_copy.h"
+
 #include <QtGui/QGuiApplication>
 #include <QtGui/QClipboard>
 
@@ -1400,6 +1404,15 @@ void FillContextMenuItems(
 				TextUtilities::SetClipboardText(list->getSelectedText());
 			}
 		}, &st::menuIconCopy);
+
+		result->addAction(AhiGram::tr(u"ahigram_copy_as_html"_q), [=] {
+			if (!list->showCopyRestrictionForSelected()) {
+				const auto textData = list->getSelectedText();
+				if (auto data = AhiGram::CopyAsHtml(textData)) {
+					QGuiApplication::clipboard()->setMimeData(data.release());
+				}
+			}
+		}, &st::menuIconCopy);
 	}
 	if (request.overSelection
 		&& !Ui::SkipTranslate(list->getSelectedText().rich)) {
@@ -1450,6 +1463,26 @@ void FillContextMenuItems(
 								}
 							}
 							TextUtilities::SetClipboardText(HistoryItemText(item));
+						}
+					}
+				}, &st::menuIconCopy);
+
+				result->addAction(AhiGram::tr(u"ahigram_copy_as_html"_q), [=] {
+					if (const auto item = owner->message(itemId)) {
+						if (!list->showCopyRestriction(item)) {
+							TextForMimeData textData;
+							if (asGroup) {
+								if (const auto group = owner->groups().find(item)) {
+									textData = HistoryGroupText(group);
+								} else {
+									textData = HistoryItemText(item);
+								}
+							} else {
+								textData = HistoryItemText(item);
+							}
+							if (auto data = AhiGram::CopyAsHtml(textData)) {
+								QGuiApplication::clipboard()->setMimeData(data.release());
+							}
 						}
 					}
 				}, &st::menuIconCopy);

@@ -152,6 +152,8 @@ set(ahigram_source_files
     ahigram/utils/ahi_deleted_message_visual.h
     ahigram/utils/ahi_version.cpp
     ahigram/utils/ahi_version.h
+    ahigram/utils/ahi_html_copy.cpp
+    ahigram/utils/ahi_html_copy.h
     ahigram/utils/ahi_ads_utils.h
     ahigram/utils/ahi_region_utils.h
     ahigram/utils/ahi_mtp_utils.cpp

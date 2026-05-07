@@ -121,8 +121,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_chat_helpers.h"
 #include "styles/style_menu_icons.h"
 
-// AhiGram
+// AhiGram Includes
 #include "ahigram/utils/ahi_deleted_message_visual.h"
+#include "ahigram/ahi_lang.h"
+#include "ahigram/utils/ahi_html_copy.h"
 
 #include <QtGui/QClipboard>
 #include <QtWidgets/QApplication>
@@ -3028,6 +3030,11 @@ void HistoryInner::showContextMenu(QContextMenuEvent *e, bool showFromTouch) {
 						: tr::lng_context_copy_selected(tr::now)),
 					[=] { copySelectedText(); },
 					&st::menuIconCopy);
+
+				_menu->addAction(
+					AhiGram::tr(u"ahigram_copy_as_html"_q),
+					[=] { copySelectedTextAsHtml(); },
+					&st::menuIconCopy);
 			}
 			if (item && !Ui::SkipTranslate(selectedText.rich)) {
 				const auto peer = item->history()->peer;
@@ -3262,6 +3269,11 @@ void HistoryInner::showContextMenu(QContextMenuEvent *e, bool showFromTouch) {
 						_menu->addAction(
 							tr::lng_context_copy_text(tr::now),
 							[=] { copyContextText(itemId); },
+							&st::menuIconCopy);
+
+						_menu->addAction(
+							AhiGram::tr(u"ahigram_copy_as_html"_q),
+							[=] { copyContextTextAsHtml(itemId); },
 							&st::menuIconCopy);
 					}
 					if ((!item->translation() || !_history->translatedTo())
@@ -3541,6 +3553,31 @@ bool HistoryInner::showCopyRestrictionForSelected() {
 void HistoryInner::copySelectedText() {
 	if (!showCopyRestrictionForSelected()) {
 		TextUtilities::SetClipboardText(getSelectedText());
+	}
+}
+
+void HistoryInner::copySelectedTextAsHtml() {
+	if (!showCopyRestrictionForSelected()) {
+		const auto textData = getSelectedText();
+		if (auto data = AhiGram::CopyAsHtml(textData)) {
+			QGuiApplication::clipboard()->setMimeData(data.release());
+		}
+	}
+}
+
+void HistoryInner::copyContextTextAsHtml(FullMsgId itemId) {
+	if (const auto item = session().data().message(itemId)) {
+		if (!showCopyRestriction(item)) {
+			TextForMimeData textData;
+			if (const auto group = session().data().groups().find(item)) {
+				textData = HistoryGroupText(group);
+			} else {
+				textData = HistoryItemText(item);
+			}
+			if (auto data = AhiGram::CopyAsHtml(textData)) {
+				QGuiApplication::clipboard()->setMimeData(data.release());
+			}
+		}
 	}
 }
 
