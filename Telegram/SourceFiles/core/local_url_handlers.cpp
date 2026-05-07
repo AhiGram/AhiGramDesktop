@@ -1879,6 +1879,8 @@ QString TryConvertUrlToLocal(QString url) {
 			return u"tg://addtheme?slug="_q + url_encode(themeMatch->captured(1));
 		} else if (const auto languageMatch = regex_match(u"^setlanguage/([a-zA-Z0-9\\.\\_\\-]+)(\\?|$)"_q, query, matchOptions)) {
 			return u"tg://setlanguage?lang="_q + url_encode(languageMatch->captured(1));
+		} else if (query == u"ahisettings"_q) {
+			return u"tg://settings/ahigram"_q;
 		} else if (const auto shareUrlMatch = regex_match(u"^share/url/?\\?(.+)$"_q, query, matchOptions)) {
 			return u"tg://msg_url?"_q + shareUrlMatch->captured(1);
 		} else if (const auto confirmPhoneMatch = regex_match(u"^confirmphone/?\\?(.+)"_q, query, matchOptions)) {

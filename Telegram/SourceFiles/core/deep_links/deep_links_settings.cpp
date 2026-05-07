@@ -75,6 +75,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_controller.h"
 #include "window/window_session_controller.h"
 
+// AhiGram Include
+#include "ahigram/ui/settings/ahi_settings_menu.h"
+
 namespace Core::DeepLinks {
 namespace {
 
@@ -2121,6 +2124,11 @@ void RegisterSettingsHandlers(Router &router) {
 	router.add(u"settings"_q, {
 		.path = u"login_email"_q,
 		.action = CodeBlock{ ShowLoginEmail },
+	});
+
+	router.add(u"settings"_q, {
+		.path = u"ahigram"_q,
+		.action = SettingsSection{ ::Settings::AhiMainSettings::Id() },
 	});
 }
 
