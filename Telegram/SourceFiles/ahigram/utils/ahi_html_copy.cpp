@@ -17,6 +17,22 @@ https://github.com/AhiGram/AhiGramDesktop/blob/master/LEGAL
 namespace AhiGram {
 namespace {
 
+const auto kMarkdownBoldPrefix = u"**\\"_q;
+const auto kHtmlGtPrefix = u"&gt;\\"_q;
+const auto kGtPrefix = u">\\"_q;
+
+[[nodiscard]] QString CleanupBlockquotes(QString html) {
+	html.replace(u"</blockquote><blockquote>"_q, u""_q);
+	html.replace(u"</blockquote> <blockquote>"_q, u" "_q);
+	html.replace(u"</blockquote>\n<blockquote>"_q, u"\n"_q);
+	html.replace(u"<blockquote> </blockquote>"_q, u" "_q);
+	html.replace(u"<blockquote></blockquote>"_q, u""_q);
+	html.replace(u"<blockquote> &gt; </blockquote>"_q, u" > "_q);
+	html.replace(u"</blockquote><a"_q, u"<a"_q);
+	html.replace(u"</a><blockquote>"_q, u"</a>"_q);
+	return html;
+}
+
 [[nodiscard]] QString ConvertTextWithTagsToHtml(
 		const QString &text,
 		const TextWithTags::Tags &tags) {
@@ -68,8 +84,9 @@ namespace {
 		} else if (id == Ui::InputField::kTagSpoiler) {
 			openTag = u"<span class=\"spoiler\">"_q;
 			closeTag = u"</span>"_q;
-		} else if (id.startsWith(Ui::InputField::kCustomEmojiTagStart)) {
-			auto emojiId = id.mid(Ui::InputField::kCustomEmojiTagStart.size());
+		} else if (id.contains(Ui::InputField::kCustomEmojiTagStart)) {
+			const auto startPos = id.indexOf(Ui::InputField::kCustomEmojiTagStart);
+			auto emojiId = id.mid(startPos + Ui::InputField::kCustomEmojiTagStart.size());
 			const auto questionIndex = emojiId.indexOf('?');
 			if (questionIndex >= 0) {
 				emojiId = emojiId.left(questionIndex);
@@ -77,7 +94,15 @@ namespace {
 			openTag = u"<tg-emoji emoji-id=\""_q + emojiId.toHtmlEscaped() + u"\">"_q;
 			closeTag = u"</tg-emoji>"_q;
 		} else if (Ui::InputField::IsValidMarkdownLink(id)) {
-			openTag = u"<a href=\""_q + id.toHtmlEscaped() + u"\">"_q;
+			auto cleanUrl = id;
+			if (cleanUrl.startsWith(kMarkdownBoldPrefix)) {
+				cleanUrl = cleanUrl.mid(kMarkdownBoldPrefix.size());
+			} else if (cleanUrl.startsWith(kHtmlGtPrefix)) {
+				cleanUrl = cleanUrl.mid(kHtmlGtPrefix.size());
+			} else if (cleanUrl.startsWith(kGtPrefix)) {
+				cleanUrl = cleanUrl.mid(kGtPrefix.size());
+			}
+			openTag = u"<a href=\""_q + cleanUrl.toHtmlEscaped() + u"\">"_q;
 			closeTag = u"</a>"_q;
 		} else {
 			continue;
@@ -110,7 +135,7 @@ namespace {
 		result.append(text.mid(offset).toHtmlEscaped());
 	}
 
-	return result;
+	return CleanupBlockquotes(result);
 }
 
 } // namespace
