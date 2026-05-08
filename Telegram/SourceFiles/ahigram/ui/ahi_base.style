@@ -27,5 +27,5 @@ dialogsAhiVerifiedIconActive: icon {
 
 infoAhiVerifiedStar: icon {
 	{ "ahigram/dialogs_ahi_verified_star", profileVerifiedCheckBg },
-	{ "ahigram/dialogs_ahi_verified_check", profileVerifiedCheckFg },
+	{ "ahigram/dialogs_ahi_verified_check", profileVerifiedCheckFg, point(0px, -1px) },
 };
