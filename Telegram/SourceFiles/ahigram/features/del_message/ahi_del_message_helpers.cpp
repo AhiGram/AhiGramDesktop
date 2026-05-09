@@ -205,6 +205,7 @@ MTPMessage BuildMtpFromHistoryItem(not_null<HistoryItem*> item) {
 		MTPMessageFwdHeader(),
 		MTP_long(0),
 		MTPlong(),
+		MTPPeer(),
 		MTPMessageReplyHeader(),
 		MTP_int(item->date()),
 		MTP_string(text.text),
