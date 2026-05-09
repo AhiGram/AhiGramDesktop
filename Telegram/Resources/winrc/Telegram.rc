@@ -64,6 +64,7 @@ BEGIN
             VALUE "FileDescription", "AhiGram Desktop"
             VALUE "FileVersion", "6.7.0.0"
             VALUE "LegalCopyright", "Copyright (C) 2014-2026"
+            VALUE "ProductName", "AhiGram Project"
             VALUE "ProductVersion", "6.7.0.0"
         END
     END
