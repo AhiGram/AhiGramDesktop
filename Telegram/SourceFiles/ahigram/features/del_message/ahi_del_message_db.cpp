@@ -28,7 +28,7 @@ Database &Database::Instance() {
 }
 
 namespace {
-const int kCurrentDbVersion = 2;
+const int kCurrentDbVersion = 3;
 } // namespace
 
 void Database::init() {
@@ -44,7 +44,7 @@ void Database::init() {
 	_dbPath = tdata + "ahigram_messages.sqlite";
 	_storage = std::make_unique<Storage>(detail::makeSavedMessagesStorage(_dbPath.toStdString()));
 
-	static constexpr int kCurrentDbVersion = 2;
+	static constexpr int kCurrentDbVersion = 3;
 	try {
 		const auto version = _storage->pragma.user_version();
 		if (version < kCurrentDbVersion) {
