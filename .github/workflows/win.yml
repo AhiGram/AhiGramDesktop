@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           DOCPATH=$TBUILD/$REPO_NAME/docs/building-win.md
-          SDK="$(grep "SDK version" $DOCPATH | sed -r 's/.*\*\*(.*)\*\* SDK version.*/\1/')"
+          SDK="$(grep -oP 'SDK \*\*\K[0-9.]+' $DOCPATH)"
           echo "SDK=$SDK" >> $GITHUB_ENV
 
           sed -i '/CMAKE_${lang}_FLAGS_DEBUG_INIT/s/${_Zi}//' "$PROGRAMFILES"/CMake/share/cmake*/Modules/Platform/Windows-MSVC.cmake
