@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       tagname:
-        description: 'Tag name'
+        description: 'Tag name (for artifact naming, optional)'
         type: string
-        required: true
+        required: false
 
 jobs:
   build:
