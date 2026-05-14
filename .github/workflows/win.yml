@@ -25,7 +25,7 @@ jobs:
         shell: bash
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAGNAME="${{ github.event.inputs.tagname }}"
+            TAGNAME="${{ github.event.inputs.tagname || github.ref_name }}"
           else
             TAGNAME="${GITHUB_REF#refs/tags/}"
           fi
@@ -47,7 +47,6 @@ jobs:
         with:
           submodules: recursive
           path: ${{ env.TBUILD }}\${{ env.REPO_NAME }}
-          ref: ${{ env.TAGNAME }}
 
       - name: First set up
         shell: bash
