@@ -49,17 +49,15 @@ jobs:
           $IMAGE_TAG \
           /usr/src/tdesktop/Telegram/build/docker/centos_env/build.sh \
           -D CMAKE_CONFIGURATION_TYPES=Release \
-          -D CMAKE_INSTALL_PREFIX="/usr" \
+          -D DESKTOP_APP_DISABLE_AUTOUPDATE=OFF \
+          -D DESKTOP_APP_USE_PACKAGED=OFF \
           -D TDESKTOP_API_ID=${{ secrets.API_ID }} \
           -D TDESKTOP_API_HASH=${{ secrets.API_HASH }}
-
-      - name: Create archive
-        run: |
-          cd out/install
-          tar -I 'zstd -T0 --ultra -22' -cvf ahigram-${{ env.TAGNAME }}-linux.tar.zst usr
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: AhiGram-linux-${{ env.TAGNAME }}
-          path: out/install/ahigram-${{ env.TAGNAME }}-linux.tar.zst
+          path: |
+            out/Release/AhiGram
+            out/Release/Updater
