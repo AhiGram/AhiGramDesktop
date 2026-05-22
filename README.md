@@ -1,49 +1,42 @@
 <div align="center">
-<img src="./docs/assets/icon.png" width="150" align="center">
 
-# [AhiGram](https://github.com/AhiGram/AhiGramDesktop)
+# AhiGram Desktop
 
-[![Telegram Channel](https://img.shields.io/badge/release-blue?logo=telegram&labelColor=gray)](https://t.me/AhiGramReleases)
-[![Telegram Channel](https://img.shields.io/badge/channel-blue?logo=telegram&labelColor=gray)](https://t.me/AhiGram)
-[![GitHub Downloads](https://img.shields.io/github/downloads/AhiGram/AhiGramDesktop/total?logo=github)](https://github.com/AhiGram/AhiGramDesktop/releases/latest)
+Unofficial fork of [Telegram Desktop](https://github.com/telegramdesktop/tdesktop) — focused on privacy, stability and new features.
 
-A modified version of [**Telegram Desktop**](https://github.com/telegramdesktop/tdesktop) that combines useful functionality from various community forks and introduces additional improvements.  
-It uses the official [Telegram API][telegram_api] and the secure [MTProto][telegram_proto] protocol.
+<br>
+
+[![Latest Release](https://img.shields.io/github/v/release/AhiGram/AhiGramDesktop?style=flat-square&color=0088cc&label=latest)](https://github.com/AhiGram/AhiGramDesktop/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/AhiGram/AhiGramDesktop/total?style=flat-square&color=0088cc&label=downloads)](https://github.com/AhiGram/AhiGramDesktop/releases/latest)
+[![Telegram Channel](https://img.shields.io/badge/channel-@AhiGram-0088cc?style=flat-square&logo=telegram&logoColor=white)](https://t.me/AhiGram)
+[![Releases Channel](https://img.shields.io/badge/releases-@AhiGramReleases-0088cc?style=flat-square&logo=telegram&logoColor=white)](https://t.me/AhiGramReleases)
+
 </div>
 
-## Privacy Features
-- **Invisible Mode** — view messages, stories, and chats without updating your online status or activity indicators.
-- **Deleted Messages Access** — allows viewing messages that were removed from chats. Media files are cached in the background, and removed messages may reappear after restarting the client.
-- **Disable Sponsored Messages** — optional setting to hide Telegram’s sponsored content inside the client.
+---
 
-## Proxy and Network Tools
-- **Smart MTProto Proxy Discovery** — automatically searches for available public proxies (including SOCKS5 and external sources). Proxy parsing logic is handled server-side and discovered proxies are stored locally to speed up future connections.
-- **Auto-Switching** — automatically connects to the fastest available proxy node.
-- **Cleaner Chat List** — proxy promotion channels are hidden from the chat list.
+<details>
+<summary><b>AhiGram Preview</b></summary>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<img src="./docs/assets/ahi_preview.png" width="680">
+<br><br>
+</details>
 
-## Developer Utilities
-- Copy the ID of premium emojis directly from the emoji selection menu.
-- Add premium emoji packs without needing an active Telegram Premium subscription.
-- Display `callback_data` for inline keyboard buttons.
+---
 
-## Other Improvements
-- Based on the latest Telegram Desktop updates.
-- Minor interface adjustments.
-- Various small bug fixes and quality-of-life improvements.
+**Privacy** — ghost mode, deleted message recovery, no sponsored content.  
+**New features** — small but meaningful additions that the upstream client doesn't ship.  
+**Stability** — tracks the latest tdesktop releases closely, no experimental rewrites.  
+**Addons** — extensibility is on the roadmap; more on that as it takes shape.
 
-## Acknowledgments
+---
 
-This project was inspired by and incorporates ideas and code from the following community projects:
+## Acknowledgements
 
-- [**Kotatogram Desktop**](https://github.com/kotatogram/kotatogram-desktop)
-- [**AyuGram Desktop**](https://github.com/AyuGram/AyuGramDesktop)
-- [**Materialgram**](https://github.com/KUKURUZKA165/materialgram)
+Based on ideas and code from [Kotatogram](https://github.com/kotatogram/kotatogram-desktop), [AyuGram](https://github.com/AyuGram/AyuGramDesktop), and [Materialgram](https://github.com/KUKURUZKA165/materialgram). Thanks to everyone behind these projects.
 
-We are grateful to these projects and their contributors for their work and inspiration.
+---
 
-[//]: # (LINKS)
-[telegram_api]: https://core.telegram.org
-[telegram_proto]: https://core.telegram.org/mtproto
-[license]: LICENSE
-[mac]: docs/building-mac.md
-[linux]: docs/building-linux.md
+<div align="center">
+<sub>AhiGram is an independent community project, not affiliated with Telegram Messenger Inc.</sub>
+</div>
